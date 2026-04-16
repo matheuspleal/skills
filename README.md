@@ -15,9 +15,8 @@
 </p>
 
 <p align="center">
-  <a href="#skills-1">Skills</a> •
   <a href="#install">Install</a> •
-  <a href="#usage">Usage</a> •
+  <a href="#all-skills">All Skills</a> •
   <a href="#license">License</a>
 </p>
 
@@ -25,7 +24,20 @@
 
 A collection of [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skills that enforce opinionated workflows around commits, testing, code quality, and more. Install once, use in every session.
 
-## Skills
+## Install
+
+| Agent | Command |
+|-------|---------|
+| **Claude Code** | `npx skills add matheuspleal/skills` |
+| **Cursor** | `npx skills add matheuspleal/skills -a cursor` |
+| **Windsurf** | `npx skills add matheuspleal/skills -a windsurf` |
+| **Copilot** | `npx skills add matheuspleal/skills -a github-copilot` |
+| **Cline** | `npx skills add matheuspleal/skills -a cline` |
+| **Any other** | `npx skills add matheuspleal/skills` |
+
+Uninstall: `npx skills remove skills`
+
+## All Skills
 
 ### ⚛️ tdd-atomic-commits
 
@@ -51,28 +63,15 @@ test(auth): cover session lookup helper edge cases
 
 Two logical units → four commits, each pair impl-first.
 
-## Install
+**Triggers:**
 
-| Agent | Command |
-|-------|---------|
-| **Claude Code** | `npx skills add matheuspleal/skills` |
-| **Cursor** | `npx skills add matheuspleal/skills -a cursor` |
-| **Windsurf** | `npx skills add matheuspleal/skills -a windsurf` |
-| **Copilot** | `npx skills add matheuspleal/skills -a github-copilot` |
-| **Cline** | `npx skills add matheuspleal/skills -a cline` |
-| **Any other** | `npx skills add matheuspleal/skills` |
+Activates automatically when the diff contains paired source + test files. Also triggers with:
 
-Uninstall: `npx skills remove skills`
-
-## Usage
-
-The skill activates automatically when you ask Claude Code to commit and the diff contains paired source + test files. You can also trigger it explicitly:
-
-- "commit this"
-- "commit the changes"
+- "commit this" / "faça os commits"
+- "commit the changes" / "commita as mudanças"
 - "make the commits"
 
-It will never silently bundle unrelated files. When in doubt, it asks.
+Never silently bundles unrelated files. When in doubt, it asks.
 
 ## License
 
