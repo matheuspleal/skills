@@ -73,6 +73,32 @@ Activates automatically when the diff contains paired source + test files. Also 
 
 Never silently bundles unrelated files. When in doubt, it asks.
 
+### 🧠 staff-engineer
+
+Senior/staff-engineer mode for non-trivial features, refactors, or migrations. Two execution modes — `plan` produces a versioned, phased implementation plan as a markdown file; `dev` implements an existing plan via TDD with atomic commits.
+
+**What it does:**
+
+- Synthesizes the canon — Fowler (refactoring, evolutionary architecture), Evans & Vernon (DDD), Uncle Bob (Clean Architecture, SOLID), Beck (TDD), Feathers (legacy code)
+- Weighs the usual tensions: YAGNI, KISS, DRY, simple-design vs. extensibility — and names the trade-off explicitly
+- Stack-agnostic; adapts to the project's language and domain
+- `plan` mode: interviews you (5–7 focused questions), then writes a phased plan file under `staff-engineer-skill/<YYYY-MM-DD>-<slug>.md` with frontmatter status lifecycle (`pending` → `in_progress` → `implemented` / `canceled`)
+- `dev` mode: picks a pending plan, implements phase-by-phase via red-green-refactor, hands off to `tdd-atomic-commits` for commits, and marks the plan implemented when done
+- First-run gitignore check: offers to add `staff-engineer-skill/` to `.gitignore` (per-project, asked once)
+
+**Plan sections:**
+
+- Always present: *Context & Constraints*, *Implementation Phases*, *Risks & Trade-offs*, *References*
+- Conditional (included only when warranted): *Domain Model*, *Architecture Decisions*, *Test Strategy*, *Migration / Rollout Plan*
+
+**Triggers:**
+
+- `/staff-engineer plan <prompt>` / `/staff-engineer dev <prompt>`
+- "let's plan this properly" / "think this through end-to-end" / "model the domain" / "design the architecture" / "split into phases"
+- Portuguese: "planejar feature" / "modelar domínio" / "arquitetura limpa" / "pensar como staff" / "preciso de um plano" / "dividir em fases"
+
+Prefer this skill over ad-hoc planning whenever the change is non-trivial — touches multiple modules, has architectural implications, introduces a new bounded context, or warrants phased rollout.
+
 ## License
 
 MIT

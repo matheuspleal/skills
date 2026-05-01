@@ -1,0 +1,94 @@
+{
+  "skill_name": "staff-engineer",
+  "evals": [
+    {
+      "id": 1,
+      "name": "pt-plan-domain-ddd",
+      "prompt": "/staff-engineer plan preciso modelar o domínio de um sistema de carrinho de compras com event sourcing, integrando com pagamentos via stripe e checagem de estoque em sistema legado",
+      "expected_output": "PT response. Plan mode. DDD/Architecture sections warranted. Plan file with full frontmatter. First-run gitignore prompt in PT.",
+      "files": [],
+      "assertions": [
+        "Final response and plan body are written in Portuguese",
+        "A plan file was created at staff-engineer-skill/<YYYY-MM-DD>-<slug>.md (date 2026-05-01)",
+        "Plan frontmatter includes: title, slug, status: pending, created_at (ISO 8601), updated_at, implemented_at: null, canceled_at: null, language: pt, mode_history with one plan entry",
+        "Plan body includes a Domain Model section with ubiquitous language and aggregate root + invariants",
+        "Plan body includes Implementation Phases (numbered, each with goal/changes/tests/acceptance)",
+        "Plan body includes Risks & Trade-offs section that names at least one explicit YAGNI/KISS/DRY tension",
+        "Plan body includes References section citing Eric Evans and Vaughn Vernon",
+        "First-run gitignore prompt was asked in Portuguese (mentions 'staff-engineer-skill' and '.gitignore')",
+        "Skill asked clarifying questions (>=3) before producing the plan"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "en-plan-feature-flag",
+      "prompt": "/staff-engineer plan add a feature flag service for the checkout flow with percentage-based rollouts and per-user-id overrides",
+      "expected_output": "EN response. Plan mode. No DDD overkill. References Fowler/Beck/Martin.",
+      "files": [],
+      "assertions": [
+        "Final response and plan body are written in English",
+        "A plan file was created at staff-engineer-skill/<YYYY-MM-DD>-<slug>.md",
+        "Plan frontmatter is complete (title, slug, status: pending, created_at, updated_at, implemented_at: null, canceled_at: null, language: en, mode_history)",
+        "Plan body includes Implementation Phases, Risks & Trade-offs, References",
+        "Plan does NOT include a Domain Model section",
+        "Risks & Trade-offs explicitly invokes YAGNI or KISS",
+        "References cites at least one of: Fowler, Beck, Martin",
+        "First-run gitignore prompt was asked in English",
+        "Skill asked clarifying questions (>=3) before producing the plan"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "pt-mode-missing",
+      "prompt": "/staff-engineer preciso refatorar nosso PricingService legado de 4 mil linhas sem testes para algo testável",
+      "expected_output": "Asks mode-resolution question in PT. Does not produce a plan or code.",
+      "files": [],
+      "assertions": [
+        "Final response is in Portuguese",
+        "Asks the mode-resolution question mentioning 'plan', 'dev', '.md'",
+        "Does NOT create any plan file",
+        "Does NOT implement any code",
+        "Does NOT proceed past the question"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "pt-dev-existing-plan",
+      "prompt": "/staff-engineer dev",
+      "expected_output": "Picks the only pending plan, implements both phases via TDD with atomic commits in EN, marks plan implemented.",
+      "files": [],
+      "assertions": [
+        "Final response is in Portuguese (matches plan language)",
+        "string_utils.py created with both slugify and truncate functions",
+        "test_string_utils.py created with cases from plan",
+        "All tests pass",
+        "Plan frontmatter status changed from pending to implemented",
+        "Plan frontmatter implemented_at is set to non-null ISO 8601 timestamp",
+        "Plan frontmatter updated_at was bumped",
+        "Plan mode_history has a dev entry appended",
+        "Acceptance checkboxes in both phases are ticked",
+        "Git log has at least 4 commits (2 phases x impl+test)",
+        "Commits follow Conventional Commits and are in English",
+        "Implementation commits precede test commits in each pair"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "en-plan-simple-yagni",
+      "prompt": "/staff-engineer plan add a GET /health endpoint that returns 200 with JSON {status: 'ok', uptime_seconds, version}",
+      "expected_output": "Short plan (1-2 phases), no Domain Model, no Architecture Decisions. YAGNI invoked.",
+      "files": [],
+      "assertions": [
+        "Final response and plan body are written in English",
+        "A plan file was created at staff-engineer-skill/<YYYY-MM-DD>-<slug>.md",
+        "Plan frontmatter is complete with language: en",
+        "Plan body includes Implementation Phases, Risks & Trade-offs, References",
+        "Plan does NOT include a Domain Model section",
+        "Plan does NOT include an Architecture Decisions section",
+        "Plan has 1 or 2 phases (not 3+)",
+        "Risks & Trade-offs explicitly invokes YAGNI or KISS",
+        "Skill asks <= 5 clarifying questions"
+      ]
+    }
+  ]
+}
