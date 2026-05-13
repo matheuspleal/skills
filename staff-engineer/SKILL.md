@@ -87,7 +87,10 @@ Be ruthless about cutting. A plan that includes a section just to look thorough 
 ### Step 3 — Derive a slug and write the plan file
 
 - Slug: take the 2–5 most distinctive keywords from the request (semantic, not literal first words), kebab-case, ASCII only. Examples: "Add JWT auth with refresh tokens" → `auth-jwt-refresh`; "Modelar carrinho de compras com event sourcing" → `cart-event-sourcing`; "Refactor checkout to clean architecture" → `checkout-clean-arch`.
-- Path: `staff-engineer-skill/<YYYY-MM-DD>-<slug>.md` (date is today, ISO).
+- Path: `staff-engineer-skill/<YYYY-MM-DD>-<slug>.md` (date from `date -u +%Y-%m-%d`).
+
+**Timestamps.** Every timestamp in this skill (`created_at`, `updated_at`, `implemented_at`, `canceled_at`, every `mode_history` entry's `at`, every `<now>` / `<ISO 8601>` placeholder below) must be a full UTC instant with hours, minutes, and seconds — e.g. `2026-05-12T17:42:09Z`. Do **not** synthesize the value from the `currentDate` context: that context has no clock and you will fill `T00:00:00Z`, which is wrong. Run `date -u +%Y-%m-%dT%H:%M:%SZ` via Bash at the moment you need the value and use whatever it returns. Re-run it for each fresh stamp (creation, updates, mode transitions, completion, cancellation) — never reuse an earlier value.
+
 - Frontmatter (keys always English; values follow the spec below):
 
 ```yaml
@@ -95,13 +98,13 @@ Be ruthless about cutting. A plan that includes a section just to look thorough 
 title: <Plan title in user's language>
 slug: <kebab-slug>
 status: pending
-created_at: <ISO 8601, e.g. 2026-05-01T14:32:00Z>
-updated_at: <ISO 8601>
+created_at: <ISO 8601 UTC with time, e.g. 2026-05-12T17:42:09Z — from `date -u +%Y-%m-%dT%H:%M:%SZ`>
+updated_at: <same format, same command>
 implemented_at: null
 canceled_at: null
 language: <pt | en>
 mode_history:
-  - { mode: plan, at: <ISO 8601> }
+  - { mode: plan, at: <same format, same command> }
 ---
 ```
 
