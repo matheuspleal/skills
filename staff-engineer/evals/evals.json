@@ -89,6 +89,79 @@
         "Risks & Trade-offs explicitly invokes YAGNI or KISS",
         "Skill asks <= 5 clarifying questions"
       ]
+    },
+    {
+      "id": 6,
+      "name": "pt-plan-adaptive-legacy",
+      "prompt": "/staff-engineer plan tenho um PricingService legado com ~4 mil linhas, sem nenhum teste, cheio de if aninhado e acesso direto ao banco no meio da regra. Preciso adicionar um novo tipo de desconto progressivo. Não posso reescrever o serviço agora, quero seguir o padrão que já existe no arquivo e entregar rápido.",
+      "expected_output": "PT response. Plan mode. Rigor auto-detected and asked with 3 options, adaptive suggested as '(detected)'. Plan recorded with rigor: adaptive. Lean plan: no Domain Model, no Architecture Decisions. Risks & Trade-offs explicitly records the conscious decision to follow the legacy convention against the canon.",
+      "files": [],
+      "assertions": [
+        "Final response and plan body are written in Portuguese",
+        "Skill presented a rigor choice with three levels (adaptive, balanced, strict) and a one-line rationale each, in Portuguese",
+        "The adaptive level was the suggested/detected option (labeled detected or equivalent) given the legacy, untested context",
+        "A plan file was created at staff-engineer-skill/<YYYY-MM-DD>-<slug>.md",
+        "Plan frontmatter includes rigor: adaptive and rigor_detected: adaptive",
+        "Plan body does NOT include a Domain Model section",
+        "Plan body does NOT include an Architecture Decisions section",
+        "Risks & Trade-offs explicitly names at least one place where following the existing legacy convention diverges from the canon and states it is a deliberate choice",
+        "Plan does NOT mandate a full TDD rewrite of the legacy service"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "en-plan-strict-backend-explicit",
+      "prompt": "/staff-engineer plan strict design a new backend bounded context for subscription billing: create subscription, change plan with proration, cancel at period end, emit a domain event consumers can react to. Node/TypeScript backend.",
+      "expected_output": "EN response. Plan mode. Explicit strict override acknowledged WITHOUT asking the rigor question. Reads backend-canon. Plan includes Domain Model + Architecture Decisions + Test Strategy by default. Grounds backend patterns in node-js-boilerplate (layers, Either, factories) or records a WebFetch attempt/fallback. References cite the canon.",
+      "files": [],
+      "assertions": [
+        "Final response and plan body are written in English",
+        "Skill did NOT ask the user to choose a rigor level (explicit strict token was honored)",
+        "A plan file was created at staff-engineer-skill/<YYYY-MM-DD>-<slug>.md",
+        "Plan frontmatter includes rigor: strict and a rigor_detected key",
+        "Plan body includes a Domain Model section (aggregate/invariants for subscription billing)",
+        "Plan body includes an Architecture Decisions section describing Clean Architecture layering (domain/application/infrastructure/presentation)",
+        "Plan body includes a Test Strategy section consistent with mandatory TDD",
+        "Plan references the node-js-boilerplate as the backend source of truth OR explicitly records that it could not be fetched and is proceeding from the canon",
+        "References section cites at least two of: Evans, Vernon, Martin, Beck",
+        "Domain events emitted after persistence are reflected in the design"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "en-plan-asks-rigor-suggestion",
+      "prompt": "/staff-engineer plan add an audit log: every write to the orders table should append an immutable record (who, when, what changed). We have some unit tests on the service layer but no domain layer and the controllers are pretty thin and untested.",
+      "expected_output": "EN response. Plan mode. No rigor token, mixed project signals -> skill auto-detects, suggests balanced as detected, but still presents all three levels with rationale before committing rigor. Resolved rigor recorded in frontmatter along with rigor_detected.",
+      "files": [],
+      "assertions": [
+        "Final response and plan body are written in English",
+        "Skill presented exactly the three rigor levels (adaptive, balanced, strict), each with a one-line rationale",
+        "One option was marked as the detected/suggested level and it was balanced (mixed signals: some tests, no domain layer)",
+        "The skill asked or surfaced this rigor choice rather than silently picking without showing the suggestion",
+        "A plan file was created at staff-engineer-skill/<YYYY-MM-DD>-<slug>.md",
+        "Plan frontmatter includes both a rigor key and a rigor_detected key with valid values",
+        "rigor_detected is balanced"
+      ]
+    },
+    {
+      "id": 9,
+      "name": "pt-dev-respects-strict-rigor",
+      "prompt": "/staff-engineer dev",
+      "expected_output": "A pending plan with rigor: strict already exists at staff-engineer-skill/2026-05-19-money-format.md. Dev mode picks it, reads rigor from frontmatter WITHOUT re-asking, implements both phases strictly via TDD (failing test first), atomic commits impl-before-test in English, marks the plan implemented. Conversation in PT (plan language).",
+      "files": ["evals/files/strict-dev-fixture/staff-engineer-skill/2026-05-19-money-format.md"],
+      "assertions": [
+        "Final response is in Portuguese (matches the plan language)",
+        "Skill did NOT ask the user to choose or confirm a rigor level in dev mode",
+        "money.py created with format_brl handling positive and negative cents",
+        "A test file was created with the cases from both phases",
+        "A failing test existed before the implementation for at least one phase (visible in transcript or commit order)",
+        "All tests pass at the end",
+        "Plan frontmatter status changed from pending to implemented and implemented_at is a non-null ISO 8601 timestamp",
+        "Plan frontmatter rigor remained strict (unchanged)",
+        "mode_history has a dev entry appended",
+        "Acceptance checkboxes in both phases are ticked",
+        "Git log has implementation commits preceding their paired test commits, Conventional Commits, in English"
+      ]
     }
   ]
 }
