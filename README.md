@@ -75,7 +75,7 @@ Never silently bundles unrelated files. When in doubt, it asks.
 
 ### 🧠 staff-engineer
 
-Senior/staff-engineer mode for non-trivial features, refactors, or migrations. Two execution modes — `plan` produces a versioned, phased implementation plan as a markdown file; `dev` implements an existing plan via TDD with atomic commits.
+Senior/staff-engineer mode for non-trivial features, refactors, or migrations. Two orthogonal axes: an **execution mode** — `plan` produces a versioned, phased implementation plan as a markdown file; `dev` implements an existing plan — and a **rigor level** that controls how strictly the canon is applied.
 
 **What it does:**
 
@@ -86,16 +86,23 @@ Senior/staff-engineer mode for non-trivial features, refactors, or migrations. T
 - `dev` mode: picks a pending plan, implements phase-by-phase via red-green-refactor, hands off to `tdd-atomic-commits` for commits, and marks the plan implemented when done
 - First-run gitignore check: offers to add `staff-engineer-skill/` to `.gitignore` (per-project, asked once)
 
+**Rigor levels** (auto-detected from the project, suggested, then confirmed when a plan is created; recorded in the plan's frontmatter and obeyed by `dev`):
+
+- `adaptive` — mirror the project's existing conventions even when subpar (staff dropped into a legacy/foreign codebase); tests only where cheap or already present
+- `balanced` — pragmatic; resist clearly harmful practices, tests for new/changed behavior, improve at the edges
+- `strict` — full canon: TDD/DDD/Clean Architecture, with the [node-js-boilerplate](https://github.com/matheuspleal/node-js-boilerplate) as the backend source of truth (fetched on demand); community best practices for frontend
+- Override the auto-detect-and-ask flow with an explicit token: `/staff-engineer plan strict <prompt>`
+
 **Plan sections:**
 
 - Always present: *Context & Constraints*, *Implementation Phases*, *Risks & Trade-offs*, *References*
-- Conditional (included only when warranted): *Domain Model*, *Architecture Decisions*, *Test Strategy*, *Migration / Rollout Plan*
+- Conditional: *Domain Model*, *Architecture Decisions*, *Test Strategy*, *Migration / Rollout Plan* — included when warranted; `strict` turns the first three on by default, `adaptive` biases them off
 
 **Triggers:**
 
-- `/staff-engineer plan <prompt>` / `/staff-engineer dev <prompt>`
-- "let's plan this properly" / "think this through end-to-end" / "model the domain" / "design the architecture" / "split into phases"
-- Portuguese: "planejar feature" / "modelar domínio" / "arquitetura limpa" / "pensar como staff" / "preciso de um plano" / "dividir em fases"
+- `/staff-engineer [plan|dev] [adaptive|balanced|strict] <prompt>`
+- "let's plan this properly" / "think this through end-to-end" / "model the domain" / "design the architecture" / "split into phases" / "follow the legacy project's pattern" / "strict/rigorous TDD"
+- Portuguese: "planejar feature" / "modelar domínio" / "arquitetura limpa" / "pensar como staff" / "preciso de um plano" / "dividir em fases" / "seguir o padrão do projeto legado" / "modo adaptive/balanced/strict"
 
 Prefer this skill over ad-hoc planning whenever the change is non-trivial — touches multiple modules, has architectural implications, introduces a new bounded context, or warrants phased rollout.
 
