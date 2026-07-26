@@ -57,6 +57,14 @@ Write the smallest change that makes the test pass.
 
 The discipline of small green steps is what keeps the red-green-refactor cycle tight and the design driven by tests rather than imagination.
 
+### Verify third-party APIs before you write against them
+
+If the green step calls into a library — configuration, lifecycle hooks, transactions, auth, anything with options you'd otherwise recall from memory — check the docs for **the version the project actually installs** before writing the call. See `live-docs.md`; the Context7 MCP is the fast path when it's available.
+
+One lookup costs a few seconds. Confidently writing an API that moved two majors ago costs a debugging session, and the failure doesn't announce itself as a knowledge problem.
+
+Skip this for plain language-level logic. There's nothing to verify and the round trip is pure cost.
+
 ### When the green is hard
 
 Sometimes the smallest change is genuinely large because the test reaches across many components. When that happens, the test was probably too big — back up, write a smaller test on a smaller seam, and grow up to the original test from there. (This is GOOS / outside-in mockist style.)
