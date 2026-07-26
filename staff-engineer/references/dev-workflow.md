@@ -7,7 +7,7 @@ How `dev` mode actually executes a plan. Read this before starting `dev` mode fo
 For each phase in the plan:
 
 ```
-read phase  →  red  →  green  →  refactor  →  commit (impl + test)  →  mark phase done
+read phase  →  red  →  green  →  refactor  →  commit (impl + test)  →  mark phase done + accept ADRs
 ```
 
 Then repeat for the next phase. When all phases pass, mark the plan `implemented`.
@@ -101,7 +101,7 @@ Each phase typically yields one or more impl/test commit pairs. Hand off to the 
 
 If the user asked the skill to skip commits (e.g., they want to review before committing), respect that. The phase isn't truly "done" until committed, but the user gets to choose the cadence.
 
-## Step 6 — Mark the phase done
+## Step 6 — Mark the phase done and accept its ADRs
 
 Open the plan file. In the phase body:
 
@@ -110,6 +110,17 @@ Open the plan file. In the phase body:
 - Bump frontmatter `updated_at` to the current ISO timestamp.
 
 Save the plan. Do **not** rewrite or restructure the plan — only add the markers. The plan is a historical record once written; edits are restricted to status, timestamps, phase markers, and explicit user-requested changes.
+
+### Accepting ADRs
+
+If the plan's *Decision Records* table maps an ADR to this phase, the decision just became real in code. Flip it:
+
+- Change the ADR's `Status` line from `Proposed` to `Accepted`. **That line only** — never touch the Context, the Considered Options, or the Consequences of an ADR you're accepting. See `adr.md` for why ADRs are immutable.
+- Update the row in `docs/adr/README.md` if that index exists.
+- Update the status in the plan's *Decision Records* table.
+- Commit: `docs(adr): accept ADR-NNNN <short decision>`, or fold the status edit into the phase's implementation commit when it's genuinely the same logical change.
+
+An ADR that sits at `Proposed` forever is how `docs/adr/` drifts from a record of what the system *is* into a record of what someone once intended.
 
 ## After all phases
 
@@ -152,6 +163,20 @@ It happens. The fix is:
 3. Refactor.
 
 Do **not** make a wrong test pass by adjusting production code to match the wrong test. That's cargo-cult TDD.
+
+### Implementation invalidates a decision the plan recorded
+
+Sometimes the code teaches you that a recorded decision was wrong — the library doesn't support what the ADR assumed, the performance isn't there, the boundary is in the wrong place. Handle it in this order:
+
+1. **Stop and tell the user.** Same rule as any plan/reality divergence.
+2. **Agree on the new decision**, with the evidence that forced it. This is real information; it's the most valuable kind of ADR content.
+3. If the old ADR is still `Proposed` (nothing was built on it), it may simply be edited or marked `Rejected` — nothing depends on it yet.
+4. If the old ADR is `Accepted`, **write a new ADR that supersedes it**. Do not rewrite the accepted one. Set the old one's `Status` to `Superseded by ADR-NNNN`, give the new one `Supersedes ADR-NNNN`, and explain in its Context what the implementation revealed.
+5. Update the plan's *Decision Records* table and `adrs` frontmatter list, then continue.
+
+Commit as `docs(adr): supersede ADR-0007 with ADR-0012 <short reason>`.
+
+The instinct to "just fix the old ADR" is exactly the instinct migrations exist to defeat. The record of a decision that didn't survive contact with the code is the one a future reader most needs — it stops them from re-deriving it.
 
 ### A whole phase turns out to be wrong
 
