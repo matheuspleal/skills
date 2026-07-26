@@ -39,40 +39,6 @@ Uninstall: `npx skills remove skills`
 
 ## All Skills
 
-### ⚛️ tdd-atomic-commits
-
-Splits a working tree containing both implementation and test changes into **two atomic commits per feature** — implementation first, then its test — so git history reads like a clean, bisectable TDD story.
-
-**What it does:**
-
-- Inspects staged and unstaged changes
-- Pairs implementation files with their test files by naming convention (`foo.ts` ↔ `foo.test.ts`, `foo.py` ↔ `test_foo.py`, `foo.go` ↔ `foo_test.go`, etc.)
-- Commits implementation first, test second — every commit stands on its own
-- Uses [Conventional Commits](https://www.conventionalcommits.org/) (`feat`, `fix`, `refactor`, `test`, …)
-- Stages files by explicit path — never `git add -A` or `git add .`
-- Asks before committing unpaired files or ambiguous groupings
-
-**Example output:**
-
-```
-feat(auth): validate token expiry against server clock
-test(auth): ensure token expiry rejects skewed clocks
-refactor(auth): extract session lookup into dedicated helper
-test(auth): cover session lookup helper edge cases
-```
-
-Two logical units → four commits, each pair impl-first.
-
-**Triggers:**
-
-Activates automatically when the diff contains paired source + test files. Also triggers with:
-
-- "commit this" / "faça os commits"
-- "commit the changes" / "commita as mudanças"
-- "make the commits"
-
-Never silently bundles unrelated files. When in doubt, it asks.
-
 ### 🧠 staff-engineer
 
 Senior/staff-engineer mode for non-trivial features, refactors, migrations, and deep technical investigations. Two orthogonal axes: an **execution mode** — `research`, `plan`, `dev` — and a **rigor level** that controls how strictly the canon is applied.
@@ -132,6 +98,40 @@ Fowler (refactoring, evolutionary architecture), Evans & Vernon (DDD), Uncle Bob
 - Portuguese: "pesquisar opções" / "investigar abordagens" / "comparar bibliotecas" / "planejar feature" / "modelar domínio" / "arquitetura limpa" / "pensar como staff" / "preciso de um plano" / "dividir em fases" / "registrar decisão arquitetural" / "seguir o padrão do projeto legado" / "modo adaptive/balanced/strict"
 
 Prefer this skill over ad-hoc planning or ad-hoc research whenever the change is non-trivial — touches multiple modules, has architectural implications, introduces a new bounded context, or warrants phased rollout.
+
+### ⚛️ tdd-atomic-commits
+
+Splits a working tree containing both implementation and test changes into **two atomic commits per feature** — implementation first, then its test — so git history reads like a clean, bisectable TDD story.
+
+**What it does:**
+
+- Inspects staged and unstaged changes
+- Pairs implementation files with their test files by naming convention (`foo.ts` ↔ `foo.test.ts`, `foo.py` ↔ `test_foo.py`, `foo.go` ↔ `foo_test.go`, etc.)
+- Commits implementation first, test second — every commit stands on its own
+- Uses [Conventional Commits](https://www.conventionalcommits.org/) (`feat`, `fix`, `refactor`, `test`, …)
+- Stages files by explicit path — never `git add -A` or `git add .`
+- Asks before committing unpaired files or ambiguous groupings
+
+**Example output:**
+
+```
+feat(auth): validate token expiry against server clock
+test(auth): ensure token expiry rejects skewed clocks
+refactor(auth): extract session lookup into dedicated helper
+test(auth): cover session lookup helper edge cases
+```
+
+Two logical units → four commits, each pair impl-first.
+
+**Triggers:**
+
+Activates automatically when the diff contains paired source + test files. Also triggers with:
+
+- "commit this" / "faça os commits"
+- "commit the changes" / "commita as mudanças"
+- "make the commits"
+
+Never silently bundles unrelated files. When in doubt, it asks.
 
 ## License
 
