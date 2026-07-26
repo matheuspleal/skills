@@ -8,6 +8,7 @@ Frontmatter keys are always English. Values follow this spec.
 
 ```yaml
 ---
+kind: plan
 title: <human-readable plan title in user's language>
 slug: <kebab-case-slug>
 status: pending      # pending | in_progress | implemented | canceled
@@ -16,6 +17,10 @@ updated_at: 2026-05-01T14:32:00Z   # bump on every edit
 implemented_at: null  # set ISO timestamp when status -> implemented
 canceled_at: null     # set ISO timestamp when status -> canceled
 language: pt          # pt | en — language of the prose
+rigor: balanced           # adaptive | balanced | strict — the contract dev obeys
+rigor_detected: balanced  # what auto-detection suggested, kept for traceability
+derived_from: null        # path to the research file this plan came from, when there is one
+adrs: []                  # ADR paths this plan produced, e.g. [docs/adr/0007-....md]
 mode_history:
   - { mode: plan, at: 2026-05-01T14:32:00Z }
   # append { mode: dev, at: ... } when dev mode picks the plan up
@@ -28,6 +33,10 @@ Rules:
 - **`updated_at` bumps on every edit**, including marking phases done in `dev` mode.
 - **`status` only moves forward**: `pending → in_progress → implemented` or `pending → canceled` / `in_progress → canceled`. Once `implemented` or `canceled`, the plan is terminal.
 - **Slug ASCII-only**. No spaces, no accented characters. Keep it short — 2–5 words max.
+- **`derived_from` is bidirectional.** When a plan comes from a research file, set it here *and* append this plan's path to that file's `spawned_plans`. Half a link is worse than none — the reader who follows it from the other side hits a dead end.
+- **`adrs` lists every ADR the plan produced**, including ones the user rejected. An empty list is a legitimate and common outcome; see `adr.md` for the significance gate.
+
+Plans live at `staff-engineer-skill/plans/<YYYY-MM-DD>-<slug>.md`. Older plans may sit directly in `staff-engineer-skill/` from before the subfolder split — `dev` mode still reads those, but new plans always go in `plans/`.
 
 ## Body structure
 
@@ -40,7 +49,8 @@ These four sections are always present, in this order unless the conditional sec
 5. *(conditional: Migration / Rollout Plan)*
 6. *(conditional: Test Strategy)*
 7. Risks & Trade-offs
-8. References
+8. *(conditional: Decision Records)*
+9. References
 
 ### 1. Context & Constraints
 
@@ -121,9 +131,28 @@ The honest section. For each significant decision, name the tension:
 - **Simplicity vs. defensiveness.** Where did we skip validation / error handling because the contract makes it impossible? (Per the project's "trust internal code" rule.)
 - **Speed vs. correctness.** Where are we shipping a partial solution and following up?
 
-Each trade-off is one sentence: *"We chose X over Y because Z; reverse if W."*
+Each trade-off is one sentence: *"We chose X over Y because Z; reverse if W."* The `reverse if` clause is the load-bearing half — a trade-off with no falsification signal is just a preference with a citation attached.
 
-### 8. References
+**Overruled pushback goes here too.** When you argued against something the user asked for and they reaffirmed it, record it as an attributed trade-off: *"The user chose X over Y despite Z; revisit if W."* Attribution is not blame — it's the information a future reader needs to know the choice was deliberate rather than an oversight. See the *Constructive dissent* section in `SKILL.md`.
+
+### 8. Decision Records *(conditional)*
+
+Include when the plan produced ADRs. A short table is enough; the ADRs themselves hold the reasoning.
+
+```markdown
+## Decision Records
+
+| ADR | Decision | Status | Phase |
+|-----|----------|--------|-------|
+| [0007](../../docs/adr/0007-postgres-append-only-event-log.md) | Postgres append-only event log | Proposed | 1 |
+| [0008](../../docs/adr/0008-events-dispatched-post-commit.md) | Dispatch domain events after commit | Proposed | 3 |
+```
+
+Linking each ADR to the phase that implements it is what lets `dev` mode know when to flip `Proposed → Accepted`.
+
+When no decision in the plan cleared the significance gate, omit the section and say so in one line in *Risks & Trade-offs* — *"no architecturally significant decisions here, so no ADRs."* That sentence is real information about the size of the change; a manufactured ADR is not.
+
+### 9. References
 
 Cite specifically. Author, work, chapter or section if you know it. Examples:
 
@@ -140,6 +169,7 @@ Cite only what informed a decision. A plan that name-drops six authors without u
 
 ```markdown
 ---
+kind: plan
 title: JWT Authentication with Refresh Tokens
 slug: auth-jwt-refresh
 status: pending
@@ -148,6 +178,10 @@ updated_at: 2026-05-01T14:32:00Z
 implemented_at: null
 canceled_at: null
 language: en
+rigor: strict
+rigor_detected: strict
+derived_from: null
+adrs: [docs/adr/0004-jwt-over-server-sessions.md]
 mode_history:
   - { mode: plan, at: 2026-05-01T14:32:00Z }
 ---
@@ -247,6 +281,16 @@ end-to-end.
   no shared state. Trade-off: two auth paths in the codebase for one quarter.
   Cleanup ticket already filed.
 
+## Decision Records
+
+| ADR | Decision | Status | Phase |
+|-----|----------|--------|-------|
+| [0004](../../docs/adr/0004-jwt-over-server-sessions.md) | Stateless JWT over server-side sessions for the public API | Proposed | 1 |
+
+Token storage and key rotation did not clear the significance gate — both are
+reversible behind the `TokenSigner` / `RefreshTokenStore` ports, so they're
+recorded as trade-offs above rather than as decisions.
+
 ## References
 
 - Martin, *Clean Architecture*, Ch. 22 — layering.
@@ -261,6 +305,7 @@ end-to-end.
 
 ```markdown
 ---
+kind: plan
 title: Strangle the Old Pricing Service
 slug: pricing-strangler
 status: pending
@@ -269,6 +314,10 @@ updated_at: 2026-05-01T14:32:00Z
 implemented_at: null
 canceled_at: null
 language: en
+rigor: balanced
+rigor_detected: adaptive
+derived_from: staff-engineer-skill/research/2026-04-28-pricing-extraction-options.md
+adrs: [docs/adr/0011-strangler-fig-for-pricing.md]
 mode_history:
   - { mode: plan, at: 2026-05-01T14:32:00Z }
 ---
