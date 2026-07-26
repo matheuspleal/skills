@@ -5,18 +5,21 @@
       "id": 1,
       "name": "pt-plan-domain-ddd",
       "prompt": "/staff-engineer plan preciso modelar o domínio de um sistema de carrinho de compras com event sourcing, integrando com pagamentos via stripe e checagem de estoque em sistema legado",
-      "expected_output": "PT response. Plan mode. DDD/Architecture sections warranted. Plan file with full frontmatter. First-run gitignore prompt in PT.",
+      "expected_output": "PT response. Plan mode. DDD/Architecture sections warranted. Plan file with full frontmatter under plans/. First-run gitignore prompt in PT. Significant decisions (event sourcing, Stripe, legacy ACL) produce ADRs in English.",
       "files": [],
       "assertions": [
         "Final response and plan body are written in Portuguese",
-        "A plan file was created at staff-engineer-skill/<YYYY-MM-DD>-<slug>.md (date 2026-05-01)",
-        "Plan frontmatter includes: title, slug, status: pending, created_at (ISO 8601), updated_at, implemented_at: null, canceled_at: null, language: pt, mode_history with one plan entry",
+        "A plan file was created at staff-engineer-skill/plans/<YYYY-MM-DD>-<slug>.md",
+        "Plan frontmatter includes: kind: plan, title, slug, status: pending, created_at (ISO 8601 with time), updated_at, implemented_at: null, canceled_at: null, language: pt, rigor, rigor_detected, derived_from, adrs, mode_history with one plan entry",
         "Plan body includes a Domain Model section with ubiquitous language and aggregate root + invariants",
         "Plan body includes Implementation Phases (numbered, each with goal/changes/tests/acceptance)",
         "Plan body includes Risks & Trade-offs section that names at least one explicit YAGNI/KISS/DRY tension",
         "Plan body includes References section citing Eric Evans and Vaughn Vernon",
         "First-run gitignore prompt was asked in Portuguese (mentions 'staff-engineer-skill' and '.gitignore')",
-        "Skill asked clarifying questions (>=3) before producing the plan"
+        "Skill asked clarifying questions (>=3) before producing the plan",
+        "At least one ADR was created under docs/adr/ for a significant decision (event sourcing, Stripe integration, or the legacy anti-corruption layer)",
+        "ADR files are written in English even though the plan is in Portuguese",
+        "The plan's adrs frontmatter list and Decision Records table reference the ADR files that were created"
       ]
     },
     {
@@ -27,8 +30,8 @@
       "files": [],
       "assertions": [
         "Final response and plan body are written in English",
-        "A plan file was created at staff-engineer-skill/<YYYY-MM-DD>-<slug>.md",
-        "Plan frontmatter is complete (title, slug, status: pending, created_at, updated_at, implemented_at: null, canceled_at: null, language: en, mode_history)",
+        "A plan file was created at staff-engineer-skill/plans/<YYYY-MM-DD>-<slug>.md",
+        "Plan frontmatter is complete (kind, title, slug, status: pending, created_at, updated_at, implemented_at: null, canceled_at: null, language: en, rigor, rigor_detected, derived_from, adrs, mode_history)",
         "Plan body includes Implementation Phases, Risks & Trade-offs, References",
         "Plan does NOT include a Domain Model section",
         "Risks & Trade-offs explicitly invokes YAGNI or KISS",
@@ -41,12 +44,13 @@
       "id": 3,
       "name": "pt-mode-missing",
       "prompt": "/staff-engineer preciso refatorar nosso PricingService legado de 4 mil linhas sem testes para algo testável",
-      "expected_output": "Asks mode-resolution question in PT. Does not produce a plan or code.",
+      "expected_output": "Asks mode-resolution question in PT, offering all three modes. Does not produce a plan, research, or code.",
       "files": [],
       "assertions": [
         "Final response is in Portuguese",
-        "Asks the mode-resolution question mentioning 'plan', 'dev', '.md'",
+        "Asks the mode-resolution question offering all three execution modes: research, plan, and dev",
         "Does NOT create any plan file",
+        "Does NOT create any research file",
         "Does NOT implement any code",
         "Does NOT proceed past the question"
       ]
@@ -74,71 +78,77 @@
     },
     {
       "id": 5,
-      "name": "en-plan-simple-yagni",
+      "name": "en-plan-simple-yagni-no-adr",
       "prompt": "/staff-engineer plan add a GET /health endpoint that returns 200 with JSON {status: 'ok', uptime_seconds, version}",
-      "expected_output": "Short plan (1-2 phases), no Domain Model, no Architecture Decisions. YAGNI invoked.",
+      "expected_output": "Short plan (1-2 phases), no Domain Model, no Architecture Decisions, and crucially ZERO ADRs — nothing here clears the significance gate, and the skill says so explicitly instead of manufacturing one.",
       "files": [],
       "assertions": [
         "Final response and plan body are written in English",
-        "A plan file was created at staff-engineer-skill/<YYYY-MM-DD>-<slug>.md",
+        "A plan file was created at staff-engineer-skill/plans/<YYYY-MM-DD>-<slug>.md",
         "Plan frontmatter is complete with language: en",
         "Plan body includes Implementation Phases, Risks & Trade-offs, References",
         "Plan does NOT include a Domain Model section",
         "Plan does NOT include an Architecture Decisions section",
         "Plan has 1 or 2 phases (not 3+)",
         "Risks & Trade-offs explicitly invokes YAGNI or KISS",
-        "Skill asks <= 5 clarifying questions"
+        "Skill asks <= 5 clarifying questions",
+        "NO ADR file was created anywhere (docs/adr/ is absent or empty)",
+        "The plan's adrs frontmatter list is empty",
+        "The skill explicitly states that no architecturally significant decisions were found, rather than silently omitting the topic"
       ]
     },
     {
       "id": 6,
       "name": "pt-plan-adaptive-legacy",
       "prompt": "/staff-engineer plan tenho um PricingService legado com ~4 mil linhas, sem nenhum teste, cheio de if aninhado e acesso direto ao banco no meio da regra. Preciso adicionar um novo tipo de desconto progressivo. Não posso reescrever o serviço agora, quero seguir o padrão que já existe no arquivo e entregar rápido.",
-      "expected_output": "PT response. Plan mode. Rigor auto-detected and asked with 3 options, adaptive suggested as '(detected)'. Plan recorded with rigor: adaptive. Lean plan: no Domain Model, no Architecture Decisions. Risks & Trade-offs explicitly records the conscious decision to follow the legacy convention against the canon.",
+      "expected_output": "PT response. Plan mode. Rigor auto-detected and asked with 3 options, adaptive suggested as '(detected)'. Plan recorded with rigor: adaptive. Lean plan. Risks & Trade-offs records the conscious decision to follow the legacy convention against the canon. An ADR is legitimate here — deliberately diverging from good practice clears the significance gate even under adaptive.",
       "files": [],
       "assertions": [
         "Final response and plan body are written in Portuguese",
         "Skill presented a rigor choice with three levels (adaptive, balanced, strict) and a one-line rationale each, in Portuguese",
         "The adaptive level was the suggested/detected option (labeled detected or equivalent) given the legacy, untested context",
-        "A plan file was created at staff-engineer-skill/<YYYY-MM-DD>-<slug>.md",
+        "A plan file was created at staff-engineer-skill/plans/<YYYY-MM-DD>-<slug>.md",
         "Plan frontmatter includes rigor: adaptive and rigor_detected: adaptive",
         "Plan body does NOT include a Domain Model section",
         "Plan body does NOT include an Architecture Decisions section",
         "Risks & Trade-offs explicitly names at least one place where following the existing legacy convention diverges from the canon and states it is a deliberate choice",
-        "Plan does NOT mandate a full TDD rewrite of the legacy service"
+        "Plan does NOT mandate a full TDD rewrite of the legacy service",
+        "Adaptive rigor did not suppress ADR consideration — the skill either created an ADR recording the deliberate divergence, or explicitly reasoned about whether one was warranted"
       ]
     },
     {
       "id": 7,
       "name": "en-plan-strict-backend-explicit",
       "prompt": "/staff-engineer plan strict design a new backend bounded context for subscription billing: create subscription, change plan with proration, cancel at period end, emit a domain event consumers can react to. Node/TypeScript backend.",
-      "expected_output": "EN response. Plan mode. Explicit strict override acknowledged WITHOUT asking the rigor question. Reads backend-canon. Plan includes Domain Model + Architecture Decisions + Test Strategy by default. Grounds backend patterns in node-js-boilerplate (layers, Either, factories) or records a WebFetch attempt/fallback. References cite the canon.",
+      "expected_output": "EN response. Plan mode. Explicit strict override acknowledged WITHOUT asking the rigor question. Reads backend-canon. Plan includes Domain Model + Architecture Decisions + Test Strategy by default. Grounds backend patterns in node-js-boilerplate. New bounded context clears the ADR gate.",
       "files": [],
       "assertions": [
         "Final response and plan body are written in English",
         "Skill did NOT ask the user to choose a rigor level (explicit strict token was honored)",
-        "A plan file was created at staff-engineer-skill/<YYYY-MM-DD>-<slug>.md",
+        "A plan file was created at staff-engineer-skill/plans/<YYYY-MM-DD>-<slug>.md",
         "Plan frontmatter includes rigor: strict and a rigor_detected key",
         "Plan body includes a Domain Model section (aggregate/invariants for subscription billing)",
         "Plan body includes an Architecture Decisions section describing Clean Architecture layering (domain/application/infrastructure/presentation)",
         "Plan body includes a Test Strategy section consistent with mandatory TDD",
         "Plan references the node-js-boilerplate as the backend source of truth OR explicitly records that it could not be fetched and is proceeding from the canon",
         "References section cites at least two of: Evans, Vernon, Martin, Beck",
-        "Domain events emitted after persistence are reflected in the design"
+        "Domain events emitted after persistence are reflected in the design",
+        "At least one ADR was created for a significant decision (the new bounded context boundary, the proration strategy, or the event-dispatch mechanism)",
+        "Each ADR has Status: Proposed and is linked to the phase that will implement it"
       ]
     },
     {
       "id": 8,
       "name": "en-plan-asks-rigor-suggestion",
       "prompt": "/staff-engineer plan add an audit log: every write to the orders table should append an immutable record (who, when, what changed). We have some unit tests on the service layer but no domain layer and the controllers are pretty thin and untested.",
-      "expected_output": "EN response. Plan mode. No rigor token, mixed project signals -> skill auto-detects, suggests balanced as detected, but still presents all three levels with rationale before committing rigor. Resolved rigor recorded in frontmatter along with rigor_detected.",
+      "expected_output": "EN response. Plan mode. No rigor token, mixed project signals -> skill auto-detects, suggests balanced as detected, but still presents all three levels with rationale before committing rigor.",
       "files": [],
       "assertions": [
         "Final response and plan body are written in English",
         "Skill presented exactly the three rigor levels (adaptive, balanced, strict), each with a one-line rationale",
         "One option was marked as the detected/suggested level and it was balanced (mixed signals: some tests, no domain layer)",
         "The skill asked or surfaced this rigor choice rather than silently picking without showing the suggestion",
-        "A plan file was created at staff-engineer-skill/<YYYY-MM-DD>-<slug>.md",
+        "A plan file was created at staff-engineer-skill/plans/<YYYY-MM-DD>-<slug>.md",
         "Plan frontmatter includes both a rigor key and a rigor_detected key with valid values",
         "rigor_detected is balanced"
       ]
@@ -147,10 +157,11 @@
       "id": 9,
       "name": "pt-dev-respects-strict-rigor",
       "prompt": "/staff-engineer dev",
-      "expected_output": "A pending plan with rigor: strict already exists at staff-engineer-skill/2026-05-19-money-format.md. Dev mode picks it, reads rigor from frontmatter WITHOUT re-asking, implements both phases strictly via TDD (failing test first), atomic commits impl-before-test in English, marks the plan implemented. Conversation in PT (plan language).",
+      "expected_output": "A pending plan with rigor: strict already exists at the LEGACY root path staff-engineer-skill/2026-05-19-money-format.md (no plans/ subfolder). Dev mode must still find it via the compatibility branch, read rigor from frontmatter WITHOUT re-asking, implement both phases strictly via TDD, atomic commits impl-before-test in English, mark the plan implemented. Conversation in PT.",
       "files": ["evals/files/strict-dev-fixture/staff-engineer-skill/2026-05-19-money-format.md"],
       "assertions": [
         "Final response is in Portuguese (matches the plan language)",
+        "The plan at the legacy root path was found and selected (the compatibility branch works)",
         "Skill did NOT ask the user to choose or confirm a rigor level in dev mode",
         "money.py created with format_brl handling positive and negative cents",
         "A test file was created with the cases from both phases",
@@ -160,7 +171,102 @@
         "Plan frontmatter rigor remained strict (unchanged)",
         "mode_history has a dev entry appended",
         "Acceptance checkboxes in both phases are ticked",
-        "Git log has implementation commits preceding their paired test commits, Conventional Commits, in English"
+        "Git log has implementation commits preceding their paired test commits, Conventional Commits, in English",
+        "The plan file was NOT relocated into plans/ — dev mode edits in place, it does not migrate files"
+      ]
+    },
+    {
+      "id": 10,
+      "name": "pt-research-library-comparison",
+      "prompt": "/staff-engineer research preciso escolher entre Zod, Valibot e class-validator pra validação de payload nos controllers da nossa API em Node/TypeScript. O bundle size importa porque parte do schema é compartilhada com o front. Time de 4 pessoas, já usamos TypeScript strict.",
+      "expected_output": "PT response. Research mode. Writes staff-engineer-skill/research/<date>-<slug>.md with all eight sections. Findings carry verified/inferred tags. At least two real options compared including reversal cost. One recommendation. Falsification criteria present. No plan file and no code produced. Offers to turn it into a plan at the end.",
+      "files": [],
+      "assertions": [
+        "Final response and research body are written in Portuguese",
+        "A research file was created at staff-engineer-skill/research/<YYYY-MM-DD>-<slug>.md",
+        "Research frontmatter includes kind: research, title, slug, status: complete, question, created_at (ISO 8601 with a non-zero time component), updated_at, language: pt, spawned_plans, superseded_by",
+        "All eight sections are present: Question & Scope, Method & Sources, Findings, Options & Trade-offs, Recommendation, What Would Change This, Open Questions, References",
+        "Findings are individually tagged as verified (with a source) or inferred/unverified, rather than presented as a list of untagged claims",
+        "Options & Trade-offs compares at least two real candidates and includes a reversal or migration cost for each",
+        "Recommendation commits to exactly one option rather than hedging across all of them",
+        "What Would Change This names at least two concrete, checkable signals that would invalidate the recommendation",
+        "NO plan file was created",
+        "NO implementation code was written",
+        "The skill offered to turn the research into a plan as a next step",
+        "The skill attempted to check the versions actually installed in the project (package.json / lockfile) or explicitly noted it could not"
+      ]
+    },
+    {
+      "id": 11,
+      "name": "pt-plan-pushback-microservices",
+      "prompt": "/staff-engineer plan somos 2 devs e vamos começar um MVP de marketplace do zero. Já decidi que vai ser microserviços desde o dia 1: um serviço pra usuários, um pra produtos, um pra pedidos, um pra pagamentos, cada um com seu banco, comunicando por eventos. Quero o plano de implementação disso.",
+      "expected_output": "PT response. The skill must push back ONCE, properly grounded (Fowler 'MonolithFirst' / 'Microservice Premium', team size vs operational cost), with a concrete cost, a concrete alternative (modular monolith with enforced boundaries and an extraction path), and a falsifier. It must NOT comply silently, and must NOT refuse or stonewall — it still moves toward delivering a usable plan and records the disagreement as an attributed trade-off.",
+      "files": [],
+      "assertions": [
+        "Final response is in Portuguese",
+        "The skill explicitly challenged the microservices-from-day-1 decision rather than accepting it without comment",
+        "The pushback cites recognizable grounding (Fowler's MonolithFirst / Microservice Premium, or an equivalent named source) rather than asserting a bare opinion",
+        "The pushback names a concrete cost (operational overhead, distributed transactions, deploy complexity) tied to the 2-developer team size",
+        "The pushback proposes a concrete alternative such as a modular monolith with enforced module boundaries and an extraction path",
+        "The pushback includes a falsifier — a condition under which microservices WOULD be the right call",
+        "The skill did NOT refuse the task and did not stall indefinitely; it still moved toward delivering a plan",
+        "The skill pushed back once and did not repeat the same argument several times in the same response",
+        "If a plan file was produced, its Risks & Trade-offs records the disagreement as an attributed decision (user chose X over Y despite Z, revisit if W)",
+        "The service-boundary decision is significant enough that an ADR was created or explicitly proposed"
+      ]
+    },
+    {
+      "id": 12,
+      "name": "en-plan-matches-existing-adr-format",
+      "prompt": "/staff-engineer plan we need to move order processing off synchronous HTTP onto a queue so the checkout request returns immediately. Node/TypeScript, and we already run Postgres.",
+      "expected_output": "The repo already has two Nygard-format ADRs (0001, 0002) in docs/adr. The skill must detect the directory, match the existing Nygard template rather than imposing MADR, and number the new ADR 0003.",
+      "files": [
+        "evals/files/existing-adrs/docs/adr/0001-use-nygard-adrs.md",
+        "evals/files/existing-adrs/docs/adr/0002-postgres-as-primary-datastore.md"
+      ],
+      "assertions": [
+        "The skill detected the existing docs/adr/ directory instead of creating a new ADR location",
+        "A new ADR was created numbered 0003 — next in sequence, zero-padded to 4 digits",
+        "The new ADR follows the existing Nygard template (a Date line, then ## Status / ## Context / ## Decision / ## Consequences headings) and does NOT impose the default MADR structure",
+        "Existing ADRs 0001 and 0002 were left byte-identical — no reformatting, no template migration",
+        "The new ADR has Status: Proposed",
+        "The new ADR is written in English",
+        "A plan file was created at staff-engineer-skill/plans/<YYYY-MM-DD>-<slug>.md and its adrs frontmatter references the new ADR path"
+      ]
+    },
+    {
+      "id": 13,
+      "name": "pt-plan-derives-from-research",
+      "prompt": "/staff-engineer plan quero implementar a fila de e-mails de onboarding que a gente pesquisou",
+      "expected_output": "A completed research file already exists at staff-engineer-skill/research/2026-06-02-background-job-runner.md recommending pg-boss. The plan must find it, read it, set derived_from, NOT re-ask questions the research already settled (which runner, why not Redis), and carry the recommendation into the plan. The research file's spawned_plans must be updated too.",
+      "files": ["evals/files/research-fixture/staff-engineer-skill/research/2026-06-02-background-job-runner.md"],
+      "assertions": [
+        "Final response and plan body are written in Portuguese",
+        "The skill found and read the existing research file before asking its questions",
+        "Plan frontmatter derived_from points at staff-engineer-skill/research/2026-06-02-background-job-runner.md",
+        "The research file's spawned_plans array was updated to include the new plan's path — the link is bidirectional",
+        "The plan adopts pg-boss, the research's recommendation, rather than re-opening the runner choice",
+        "The skill did NOT re-ask which job runner to use or whether to add Redis — questions the research already settled",
+        "The research file's prose was otherwise left unchanged; only frontmatter spawned_plans and updated_at were touched",
+        "A plan file was created at staff-engineer-skill/plans/<YYYY-MM-DD>-<slug>.md"
+      ]
+    },
+    {
+      "id": 14,
+      "name": "en-research-rejects-premise",
+      "prompt": "/staff-engineer research which distributed cache should we put in front of our Postgres queries — Redis, Memcached, or Hazelcast? Our slowest endpoint is the order history page which takes about 900ms. We have roughly 40 daily active users right now.",
+      "expected_output": "EN response. Research mode. The premise is weak — 40 DAU does not justify a distributed cache, and a 900ms query is almost certainly a missing index or an N+1. The research must still compare the caches the user asked about (ruling something out with data beats ruling it out by assertion) while the recommendation challenges the premise and points at the cheaper fix first.",
+      "files": [],
+      "assertions": [
+        "Final response and research body are written in English",
+        "A research file was created at staff-engineer-skill/research/<YYYY-MM-DD>-<slug>.md",
+        "The research still compares the three cache options the user asked about rather than ignoring the question",
+        "The recommendation challenges the premise — it identifies that 40 daily active users does not justify a distributed cache",
+        "The research points at a cheaper first step (query plan analysis, indexing, or fixing an N+1) before adding infrastructure",
+        "The challenge is grounded in something concrete (the DAU figure, the operational cost of another service) rather than asserted as a preference",
+        "What Would Change This names the traffic level or access pattern at which a cache WOULD become the right call",
+        "The skill did NOT simply pick a cache in order to be agreeable",
+        "All eight research sections are present"
       ]
     }
   ]
