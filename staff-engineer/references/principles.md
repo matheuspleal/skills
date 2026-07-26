@@ -8,6 +8,7 @@ A working summary of the canon this skill leans on. Read the section that matche
 - [DDD — Domain-Driven Design](#ddd--domain-driven-design)
 - [Clean Architecture and the dependency rule](#clean-architecture-and-the-dependency-rule)
 - [SOLID](#solid)
+- [Object Calisthenics](#object-calisthenics)
 - [YAGNI / KISS / DRY — the trade-off triangle](#yagni--kiss--dry--the-trade-off-triangle)
 - [Working with legacy code](#working-with-legacy-code)
 - [Patterns to reach for sparingly](#patterns-to-reach-for-sparingly)
@@ -133,6 +134,62 @@ Clean Architecture pays for itself when the domain has staying power and the out
 - **D — Dependency Inversion.** High-level modules don't depend on low-level modules; both depend on abstractions. The dependency-rule arrow.
 
 SOLID is a *vocabulary for trade-offs*, not a checklist. "Violates SRP" is rarely true on its own — it depends on what counts as "one reason to change" in your context.
+
+---
+
+## Object Calisthenics
+
+**Canonical source:** Jeff Bay, "Object Calisthenics", in *The ThoughtWorks Anthology* (2008).
+
+### What it actually is
+
+Nine deliberately extreme rules, written as a **training exercise**: take a 1000-line program, apply all nine, and you'll be forced into small objects, real encapsulation, and behavior that lives next to its data. Bay's framing is explicit — the constraints are exaggerated on purpose, so that following them mechanically makes design lessons unavoidable.
+
+That framing matters, because the rules circulate widely without it and get adopted as a production style guide. They weren't written to be one. Applied literally to production code, several of them make things worse.
+
+### The nine rules
+
+1. Only one level of indentation per method.
+2. Don't use the `else` keyword.
+3. Wrap all primitives and strings.
+4. First-class collections.
+5. One dot per line.
+6. Don't abbreviate.
+7. Keep all entities small.
+8. No class with more than two instance variables.
+9. No getters, setters, or properties.
+
+### Which ones survive contact with production
+
+Three of them are DDD wearing different clothes, and they're the reason this exercise is worth knowing:
+
+- **Rule 3 (wrap primitives)** is Fowler's *primitive obsession* smell and Evans' **Value Object**. `Money`, `Email`, `Cpf`, `DateRange` — a validated type that can't hold an invalid value beats a `string` validated at nine call sites. This one is load-bearing.
+- **Rule 4 (first-class collections)** — a class whose only field is a collection. It gives collection-specific behavior (filtering, invariants, deltas) a home instead of scattering it across callers. `WatchedList`-style aggregate collections are exactly this.
+- **Rule 9 (no getters/setters)** is *Tell, Don't Ask*. An object exposing every field through accessors isn't an object; it's a struct with ceremony, and its behavior ends up in whoever reads it. This is the rule that separates a rich aggregate from an anemic domain model (Fowler, "AnemicDomainModel", 2003).
+
+Two are useful heuristics with well-known names:
+
+- **Rule 5 (one dot per line)** is the **Law of Demeter** (Lieberherr, 1987). `a.getB().getC().doThing()` couples you to two structures you don't own. Note that fluent interfaces and pipelines chain by design and don't violate the spirit — the rule is about reaching *through* objects, not about counting dots.
+- **Rule 2 (no else)** is guard clauses and early returns. Real value at the lint level; it stops being a virtue the moment you contort a genuinely two-branch decision to avoid the keyword.
+
+Four are the exercise, not the practice:
+
+- **Rules 1, 6, 7 (one indent level, no abbreviations, small entities)** — good instincts, arbitrary thresholds. Bay's "50 lines per class, 10 files per package" is a forcing function for a kata, not a budget to enforce in review.
+- **Rule 8 (max two instance variables)** is the most extreme of the nine and the least defensible in production. A legitimate aggregate root routinely holds more than two fields. Chasing this rule produces wrapper classes that exist only to satisfy the rule.
+
+### Language fit
+
+The exercise is object-oriented and assumes a class-based language. In Go, Rust, Elixir, or a functional TypeScript codebase, rules 8 and 9 don't translate at all — a Go struct with exported fields plus functions over it is idiomatic, and "no getters/setters" is meaningless where there are none. Rule 3 does translate (newtypes, branded types, opaque types), and it's usually the most valuable one to carry across.
+
+Don't apply OO calisthenics to non-OO code. That's cargo cult.
+
+### How this interacts with rigor
+
+- **`strict`** — treat rules 3, 4, and 9 as expected practice, because they *are* tactical DDD: no primitive obsession in the domain layer, collections with behavior, aggregates that enforce their own invariants rather than exposing them. The other six stay advisory.
+- **`balanced`** — use all nine as smells, not rules. A `string` holding a currency is worth a comment; a class with three fields is not.
+- **`adaptive`** — don't impose any of them. A codebase that passes DTOs of primitives around is internally consistent, and introducing one `Money` value object into it creates two conventions instead of one. Note the divergence in *Risks & Trade-offs* and move on.
+
+Whichever level you're at: cite the rule by what it *is* — "primitive obsession", "Tell Don't Ask", "Law of Demeter" — rather than by its number. "Violates Object Calisthenics rule 8" persuades nobody and shouldn't.
 
 ---
 
