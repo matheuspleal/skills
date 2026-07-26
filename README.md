@@ -75,16 +75,35 @@ Never silently bundles unrelated files. When in doubt, it asks.
 
 ### 🧠 staff-engineer
 
-Senior/staff-engineer mode for non-trivial features, refactors, or migrations. Two orthogonal axes: an **execution mode** — `plan` produces a versioned, phased implementation plan as a markdown file; `dev` implements an existing plan — and a **rigor level** that controls how strictly the canon is applied.
+Senior/staff-engineer mode for non-trivial features, refactors, migrations, and deep technical investigations. Two orthogonal axes: an **execution mode** — `research`, `plan`, `dev` — and a **rigor level** that controls how strictly the canon is applied.
 
-**What it does:**
+It is deliberately **not agreeable**. The value of a staff engineer is in finding what's wrong with an approach while changing it is still cheap, so the skill argues — once, with citations, a concrete cost, a real alternative, and what would prove it wrong — then executes your call and records the disagreement.
 
-- Synthesizes the canon — Fowler (refactoring, evolutionary architecture), Evans & Vernon (DDD), Uncle Bob (Clean Architecture, SOLID), Beck (TDD), Feathers (legacy code)
-- Weighs the usual tensions: YAGNI, KISS, DRY, simple-design vs. extensibility — and names the trade-off explicitly
-- Stack-agnostic; adapts to the project's language and domain
-- `plan` mode: interviews you (5–7 focused questions), then writes a phased plan file under `staff-engineer-skill/<YYYY-MM-DD>-<slug>.md` with frontmatter status lifecycle (`pending` → `in_progress` → `implemented` / `canceled`)
-- `dev` mode: picks a pending plan, implements phase-by-phase via red-green-refactor, hands off to `tdd-atomic-commits` for commits, and marks the plan implemented when done
-- First-run gitignore check: offers to add `staff-engineer-skill/` to `.gitignore` (per-project, asked once)
+**Execution modes:**
+
+```
+research  ──▶  plan  ──▶  dev
+   │            │          │
+   │            │          └─ implements phases via red-green-refactor,
+   │            │             accepts the plan's ADRs as they land
+   │            └─ phased plan file + ADRs for significant decisions
+   └─ sourced, falsifiable research file
+```
+
+Each step is optional — day to day it's `plan` → `dev`; a well-understood change goes straight to `dev` from an existing plan. Links between artifacts are recorded on both sides, so the chain stays traceable months later.
+
+- **`research`** — investigates a bounded question and writes `staff-engineer-skill/research/<date>-<slug>.md`. Every finding is tagged `[verified: <source>, accessed <date>]` or `[inferred: not verified]`, so a reader knows which claims to re-check. Always compares at least two real options with adoption / carrying / **reversal** cost, recommends one, and states what would make the recommendation wrong.
+- **`plan`** — interviews you (5–7 focused questions), then writes `staff-engineer-skill/plans/<date>-<slug>.md` with a frontmatter status lifecycle (`pending` → `in_progress` → `implemented` / `canceled`). Reuses existing research instead of re-asking what it already settled.
+- **`dev`** — picks a pending plan, implements phase-by-phase via red-green-refactor, hands off to `tdd-atomic-commits` for commits, flips the plan's ADRs to `Accepted` as phases land, and marks the plan implemented.
+
+**Architecture Decision Records:**
+
+Plans record architecturally significant decisions as ADRs in `docs/adr/` ([Nygard](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions), MADR format, `adr-tools`-compatible numbering).
+
+- **The check runs on every plan; most plans produce zero ADRs.** An ADR is about the *first* time — the system's first auth scheme earns one, the fifth endpoint using it doesn't. The gate: expensive to reverse, structural, contractual, a dependency commitment, a non-functional trade-off, or a conscious divergence from good practice. A `GET /health` plan produces none, and says so.
+- **ADRs work like migrations — superseded, never overwritten.** A changed decision means a *new* ADR; the old one keeps its content and only its `Status` line becomes `Superseded by ADR-NNNN`. The record of a decision that didn't survive is the one a future reader most needs.
+- Detects an existing ADR directory and matches its template rather than imposing one. Written in English (committed, team-facing) while plans and research follow your conversation's language. Guards against `docs/adr/` being gitignored.
+- Opt out per plan and it won't re-offer.
 
 **Rigor levels** (auto-detected from the project, suggested, then confirmed when a plan is created; recorded in the plan's frontmatter and obeyed by `dev`):
 
@@ -93,18 +112,26 @@ Senior/staff-engineer mode for non-trivial features, refactors, or migrations. T
 - `strict` — full canon: TDD/DDD/Clean Architecture, with the [node-js-boilerplate](https://github.com/matheuspleal/node-js-boilerplate) as the backend source of truth (fetched on demand); community best practices for frontend
 - Override the auto-detect-and-ask flow with an explicit token: `/staff-engineer plan strict <prompt>`
 
+**Version-pinned documentation:**
+
+Reads the project's lockfile *before* looking anything up, then consults the docs for the version actually installed — via the [Context7](https://context7.com) MCP when available, official docs otherwise. Training-data cutoffs make stale API knowledge feel exactly as confident as current knowledge; this is the habit that catches it. Sources are cited with version and access date.
+
+**The canon it draws on:**
+
+Fowler (refactoring, evolutionary architecture), Evans & Vernon (DDD), Uncle Bob (Clean Architecture, SOLID), Beck (TDD), Feathers (legacy code), Metz (the wrong abstraction), Nygard (ADRs), and Bay's [Object Calisthenics](https://www.cs.helsinki.fi/u/luontola/tdd-2009/ext/ObjectCalisthenics.pdf) — the last one framed as the training exercise it was written as, not a production style guide. The three rules that survive contact with production (wrap primitives, first-class collections, no getters/setters) are tactical DDD under another name; the extreme ones (max two instance variables) are the drill.
+
 **Plan sections:**
 
 - Always present: *Context & Constraints*, *Implementation Phases*, *Risks & Trade-offs*, *References*
-- Conditional: *Domain Model*, *Architecture Decisions*, *Test Strategy*, *Migration / Rollout Plan* — included when warranted; `strict` turns the first three on by default, `adaptive` biases them off
+- Conditional: *Domain Model*, *Architecture Decisions*, *Test Strategy*, *Migration / Rollout Plan*, *Decision Records* — included when warranted; `strict` turns the first three on by default, `adaptive` biases them off
 
 **Triggers:**
 
-- `/staff-engineer [plan|dev] [adaptive|balanced|strict] <prompt>`
-- "let's plan this properly" / "think this through end-to-end" / "model the domain" / "design the architecture" / "split into phases" / "follow the legacy project's pattern" / "strict/rigorous TDD"
-- Portuguese: "planejar feature" / "modelar domínio" / "arquitetura limpa" / "pensar como staff" / "preciso de um plano" / "dividir em fases" / "seguir o padrão do projeto legado" / "modo adaptive/balanced/strict"
+- `/staff-engineer [research|plan|dev] [adaptive|balanced|strict] <prompt>`
+- "research the options" / "compare these approaches" / "which library should we use" / "let's plan this properly" / "think this through end-to-end" / "model the domain" / "design the architecture" / "split into phases" / "write an ADR" / "record this decision" / "follow the legacy project's pattern" / "strict/rigorous TDD"
+- Portuguese: "pesquisar opções" / "investigar abordagens" / "comparar bibliotecas" / "planejar feature" / "modelar domínio" / "arquitetura limpa" / "pensar como staff" / "preciso de um plano" / "dividir em fases" / "registrar decisão arquitetural" / "seguir o padrão do projeto legado" / "modo adaptive/balanced/strict"
 
-Prefer this skill over ad-hoc planning whenever the change is non-trivial — touches multiple modules, has architectural implications, introduces a new bounded context, or warrants phased rollout.
+Prefer this skill over ad-hoc planning or ad-hoc research whenever the change is non-trivial — touches multiple modules, has architectural implications, introduces a new bounded context, or warrants phased rollout.
 
 ## License
 
