@@ -2,7 +2,7 @@
 
 How `research` mode works end-to-end. Read this at the start of `research` mode.
 
-Research is the **divergent** half of the workflow; `plan` is the convergent half. Keeping them apart is the whole point: a plan written while you're still discovering the problem produces confident-sounding decisions with nothing behind them. Research earns the right to decide.
+Research is the **divergent** half of the workflow; `design` is the convergent half. Keeping them apart is the whole point: a plan written while you're still discovering the problem produces confident-sounding decisions with nothing behind them. Research earns the right to decide.
 
 ## What research is for
 
@@ -30,7 +30,7 @@ While you're there, ask only what you actually need to scope the search:
 - What are the hard constraints — stack, versions, scale, deadline, team size, compliance?
 - What's the deadline for the *answer*? (a two-hour question and a two-day question get different depth)
 
-Cap at 3–5 questions. Research mode should ask fewer than plan mode, not more — the investigation is where you get your answers.
+Cap at 3–5 questions. Research mode should ask fewer than `design` mode, not more — the investigation is where you get your answers.
 
 ## Step 2 — Investigate, cheapest source first
 
@@ -91,7 +91,7 @@ status: complete          # complete | superseded
 question: <the one-sentence question this file answers>
 created_at: 2026-07-26T14:32:09Z
 updated_at: 2026-07-26T14:32:09Z
-language: pt              # pt | en — language of the prose
+language: pt-BR           # pt-BR | en-US — language of the prose
 rigor_detected: balanced  # what the project looks like; a hint for the plan, not a decision
 spawned_plans: []         # filled in when a plan is derived from this research
 superseded_by: null       # path to a later research file that replaces this one
@@ -137,7 +137,7 @@ All eight are present — unlike plan sections, none are conditional. A research
 
 ## Step 6 — Offer the next step
 
-Research that doesn't lead anywhere is a nice document. Close by asking whether the user wants a plan built on it — and if they say yes, hand off to `plan` mode with `derived_from` pointing at this file, and append the plan's path to `spawned_plans` here.
+Research that doesn't lead anywhere is a nice document. Close by asking whether the user wants a plan built on it — and if they say yes, hand off to `design` mode with `derived_from` pointing at this file, and append the plan's path to `spawned_plans` here.
 
 The link is bidirectional on purpose. Six months later, someone reading the plan needs to find the investigation, and someone reading the investigation needs to know whether anyone acted on it.
 

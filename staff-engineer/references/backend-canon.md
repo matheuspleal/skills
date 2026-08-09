@@ -14,7 +14,7 @@ repo's code — copies rot. It tells you *when* to look, *what* to pull, and
 
 **`https://github.com/matheuspleal/node-js-boilerplate`** — a production-grade
 TypeScript backend implementing Clean Architecture + DDD + TDD. Use it as the
-concrete pattern bank whenever a `strict` plan or `dev` phase touches backend.
+concrete pattern bank whenever a `strict` plan or `build` phase touches backend.
 
 Stack baseline (for orientation; verify against the repo, versions move):
 TypeScript / Node, Fastify (REST) + Apollo Server (GraphQL), Prisma + Postgres,
@@ -50,7 +50,7 @@ decision in front of you needs. Good triggers:
   *Test Strategy* section for backend → fetch to ground the layering, the
   aggregate/value-object conventions, and the test layout in how the repo
   actually does it.
-- A `strict` `dev` phase introduces a new bounded context, aggregate, use case,
+- A `strict` `build` phase introduces a new bounded context, aggregate, use case,
   repository, gateway, controller, or test file → fetch the closest existing
   example and mirror its structure before writing.
 - You're unsure how the repo wires a specific concern (events post-persistence,
@@ -70,7 +70,7 @@ within a session.
 know — Clean Architecture (Martin), DDD strategic + tactical (Evans, Vernon),
 TDD (Beck), legacy seams (Feathers) — applying the layering and patterns
 described above. Then record the gap honestly: add a line to the plan's
-*Risks & Trade-offs* (plan mode) or tell the user (dev mode) that the
+*Risks & Trade-offs* (`design` mode) or tell the user (`build` mode) that the
 `node-js-boilerplate` could not be reached, so concrete repo conventions were
 not verified and the implementation follows general canon — flag specifics
 (naming, factory wiring, exact folder names) as needing a later reconciliation

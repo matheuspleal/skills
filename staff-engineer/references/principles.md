@@ -185,9 +185,11 @@ Don't apply OO calisthenics to non-OO code. That's cargo cult.
 
 ### How this interacts with rigor
 
-- **`strict`** — treat rules 3, 4, and 9 as expected practice, because they *are* tactical DDD: no primitive obsession in the domain layer, collections with behavior, aggregates that enforce their own invariants rather than exposing them. The other six stay advisory.
-- **`balanced`** — use all nine as smells, not rules. A `string` holding a currency is worth a comment; a class with three fields is not.
-- **`adaptive`** — don't impose any of them. A codebase that passes DTOs of primitives around is internally consistent, and introducing one `Money` value object into it creates two conventions instead of one. Note the divergence in *Risks & Trade-offs* and move on.
+`rigor-levels.md` holds the binding version of this — including what `review` may and may not raise at each level. The short form:
+
+- **`strict`** — rules 3, 4, and 9 are expected practice, because they *are* tactical DDD: no primitive obsession in the domain layer, collections with behavior, aggregates that enforce their own invariants rather than exposing them. The other six stay advisory.
+- **`balanced`** — rules 3, 4, 5, and 9 are **active smells** worth a finding; the other five are advisory. A `string` holding a currency that crosses a module boundary is worth acting on; a class with three fields is not.
+- **`adaptive`** — don't impose any of them, and don't raise them in review either. A codebase that passes DTOs of primitives around is internally consistent, and introducing one `Money` value object into it creates two conventions instead of one. Note the divergence in *Risks & Trade-offs* and move on.
 
 Whichever level you're at: cite the rule by what it *is* — "primitive obsession", "Tell Don't Ask", "Law of Demeter" — rather than by its number. "Violates Object Calisthenics rule 8" persuades nobody and shouldn't.
 

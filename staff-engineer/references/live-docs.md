@@ -75,7 +75,7 @@ Every claim sourced from live docs carries the library, the version, and the acc
 
 Three reasons this matters more than it looks. It lets the reader re-verify without redoing your search. It makes the claim's shelf life visible — a 2026 citation reads differently in 2028. And it forces you to notice when you're about to state something you didn't actually check, which is the whole point.
 
-In `research` mode this is formalized as the verification ledger (see `research-mode.md`). In `plan` and `dev` mode, inline citations in the relevant section are enough.
+In `research` mode this is formalized as the verification ledger (see `research-mode.md`). In `design`, `build`, and `review` mode, inline citations in the relevant section are enough.
 
 ## Rule 5 — Fresh docs don't override project conventions in `adaptive`
 
@@ -86,8 +86,8 @@ When live docs and the project's convention disagree, the honest move is the sam
 ## When to reach for this
 
 - **`research` mode** — always, for any library or platform question. Version-pinned lookups are a required part of the method.
-- **`plan` mode** — when the plan adopts, upgrades, or replaces a dependency, or when a phase depends on specific API behavior. Ground the *Architecture Decisions* or the relevant phase in what you verified, and cite it.
-- **`dev` mode** — before writing code against an API you haven't confirmed this session, especially anything involving configuration, lifecycle hooks, transactions, or auth. One lookup is cheaper than a debugging session.
+- **`design` mode** — when the plan adopts, upgrades, or replaces a dependency, or when a phase depends on specific API behavior. Ground the *Architecture Decisions* or the relevant phase in what you verified, and cite it.
+- **`build` mode** — before writing code against an API you haven't confirmed this session, especially anything involving configuration, lifecycle hooks, transactions, or auth. One lookup is cheaper than a debugging session.
 
 Don't look things up reflexively. If the code you're writing is plain language-level logic with no third-party surface, there's nothing to verify and the round trip is pure cost.
 

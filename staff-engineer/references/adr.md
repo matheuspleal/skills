@@ -1,6 +1,6 @@
 # Architecture Decision Records
 
-How `plan` mode produces ADRs and how `dev` mode keeps them true. Read this when a plan is about to record decisions, or when a `dev` phase changes one.
+How `design` mode produces ADRs and how `build` mode keeps them true. Read this when a plan is about to record decisions, or when a `build` phase changes one.
 
 ## Why ADRs exist
 
@@ -31,6 +31,8 @@ Detect before defaulting. Check in this order and use the first that exists:
 5. `docs/decisions/`
 
 None found → create `docs/adr/`.
+
+`config.adr.dir`, when set, wins over this detection — the project already told you where they live. `config.adr.template` (`auto` by default) likewise settles the template question: `madr` or `nygard` forces one, `auto` means match what's already there.
 
 **If ADRs already exist, read one and match it.** Its numbering width, its filename convention, its template (Nygard vs MADR vs house style), its heading names, its language. Imposing your template on a repo that already has thirty ADRs in another format is exactly the failure this skill's `adaptive` instinct exists to prevent — and it applies to documentation as much as to code.
 
@@ -94,8 +96,8 @@ Proposed  ──(dev implements the phase)──▶  Accepted  ──▶  Supers
    └──(user rejects the decision)──▶ Rejected └──▶  Deprecated (no replacement)
 ```
 
-- **Proposed** — written by `plan`. The decision is on the table; nothing has been built yet.
-- **Accepted** — flipped by `dev` when the phase implementing the decision lands. The decision is now real, in code.
+- **Proposed** — written by `design`. The decision is on the table; nothing has been built yet.
+- **Accepted** — flipped by `build` when the phase implementing the decision lands. The decision is now real, in code.
 - **Rejected** — the user turned it down during planning. Keep the file; a rejected option with recorded reasoning saves the next person from re-proposing it.
 - **Superseded by ADR-NNNN** — a later decision replaced this one.
 - **Deprecated** — the decision no longer applies and nothing replaced it (the feature was removed, the constraint disappeared).
@@ -106,11 +108,23 @@ Flipping `Proposed → Accepted` is a one-line edit. It's what keeps `docs/adr/`
 
 ADRs are repo artifacts, so unlike plans they belong in git. Offer the commit; don't make it silently.
 
-- Plan mode, after writing: offer `docs(adr): propose <short decision>`.
-- Dev mode, on acceptance: `docs(adr): accept ADR-NNNN <short decision>` — or fold the one-line status edit into the phase's commit when it's the same logical change.
+- `design` mode, after writing: offer `docs(adr): propose <short decision>`.
+- `build` mode, on acceptance: `docs(adr): accept ADR-NNNN <short decision>` — or fold the one-line status edit into the phase's commit when it's the same logical change.
 - Supersession: `docs(adr): supersede ADR-0007 with ADR-0012 <short reason>`.
 
 Conventional Commits, English, per the project's git conventions.
+
+## When the plan is archived
+
+Finished plans move to `staff-engineer-skill/plans/implemented/` (or `canceled/`). Every ADR that names the plan has its `Plan:` line rewritten to the new path in that same step.
+
+This is the one edit an `Accepted` ADR receives besides its `Status` line, and it's not an exception to immutability — the decision's content doesn't change, only a pointer that would otherwise dangle. An ADR whose `Plan:` link 404s teaches the reader that the cross-references in this directory can't be trusted, which costs more than the link was worth.
+
+## What `review` does with ADRs
+
+`review` may raise *"this decision cleared the significance gate and has no ADR"* as a finding — `major` when the decision is structural, `minor` otherwise. That's the safety net for a decision that only became visible once it was code.
+
+It never flips a status. `Proposed → Accepted` belongs to `build`, when the phase lands, because that transition asserts the decision is real in the codebase — and only the mode that wrote the code can assert that.
 
 ## Template — MADR-lean (default)
 

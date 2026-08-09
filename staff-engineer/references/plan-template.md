@@ -9,34 +9,47 @@ Frontmatter keys are always English. Values follow this spec.
 ```yaml
 ---
 kind: plan
-title: <human-readable plan title in user's language>
+title: <human-readable plan title in the artifact language>
 slug: <kebab-case-slug>
 status: pending      # pending | in_progress | implemented | canceled
-created_at: 2026-05-01T14:32:00Z   # ISO 8601 UTC
-updated_at: 2026-05-01T14:32:00Z   # bump on every edit
+created_at: 2026-08-09T14:32:00Z   # ISO 8601 UTC
+updated_at: 2026-08-09T14:32:00Z   # bump on every edit
 implemented_at: null  # set ISO timestamp when status -> implemented
 canceled_at: null     # set ISO timestamp when status -> canceled
-language: pt          # pt | en — language of the prose
-rigor: balanced           # adaptive | balanced | strict — the contract dev obeys
+language: pt-BR       # pt-BR | en-US — language of the prose
+rigor: balanced           # adaptive | balanced | strict — the contract build and review obey
 rigor_detected: balanced  # what auto-detection suggested, kept for traceability
 derived_from: null        # path to the research file this plan came from, when there is one
 adrs: []                  # ADR paths this plan produced, e.g. [docs/adr/0007-....md]
+reviews: []               # review ledger paths, e.g. [staff-engineer-skill/reviews/2026-08-09-....md]
 mode_history:
-  - { mode: plan, at: 2026-05-01T14:32:00Z }
-  # append { mode: dev, at: ... } when dev mode picks the plan up
+  - { mode: design, at: 2026-08-09T14:32:00Z }
+  # append { mode: build, at: ... } when build mode picks the plan up
 ---
 ```
 
 Rules:
 
-- **Never delete entries from `mode_history`** — it's an audit trail.
-- **`updated_at` bumps on every edit**, including marking phases done in `dev` mode.
+- **Never delete entries from `mode_history`** — it's an audit trail. Entries written by earlier versions of this skill say `plan` and `dev`; leave them. Renaming a mode is not a reason to rewrite history.
+- **`updated_at` bumps on every edit**, including marking phases done in `build` mode.
 - **`status` only moves forward**: `pending → in_progress → implemented` or `pending → canceled` / `in_progress → canceled`. Once `implemented` or `canceled`, the plan is terminal.
-- **Slug ASCII-only**. No spaces, no accented characters. Keep it short — 2–5 words max.
+- **Slug ASCII-only**. No spaces, no accented characters. Keep it short — 2–5 words max. The plan's review ledger reuses this slug.
 - **`derived_from` is bidirectional.** When a plan comes from a research file, set it here *and* append this plan's path to that file's `spawned_plans`. Half a link is worse than none — the reader who follows it from the other side hits a dead end.
 - **`adrs` lists every ADR the plan produced**, including ones the user rejected. An empty list is a legitimate and common outcome; see `adr.md` for the significance gate.
+- **`language` accepts the legacy bare values** `pt` and `en` from files written by earlier versions. Read them as `pt-BR` / `en-US`; don't rewrite them.
 
-Plans live at `staff-engineer-skill/plans/<YYYY-MM-DD>-<slug>.md`. Older plans may sit directly in `staff-engineer-skill/` from before the subfolder split — `dev` mode still reads those, but new plans always go in `plans/`.
+## Where plans live
+
+```
+staff-engineer-skill/plans/
+├── 2026-08-09-checkout-queue.md      ← pending or in_progress: the actionable queue
+├── implemented/                       ← archived on completion
+└── canceled/                          ← archived on cancellation
+```
+
+`build` scans `plans/*.md` non-recursively, so archived plans drop out of selection by construction rather than by filtering. Older plans may still sit directly in `staff-engineer-skill/` from before the subfolder split — `build` reads those too, but new plans always go in `plans/`.
+
+**Archiving repairs backlinks.** Moving the file breaks every reference to its path, so the move and the repair are one step: the research file's `spawned_plans` entry, each ADR's `Plan:` line, and the review ledger's `plan:` frontmatter all get rewritten to the archived path. A dangling link costs the reader a search before they conclude the file is gone — worse than no link at all.
 
 ## Body structure
 
@@ -135,6 +148,8 @@ Each trade-off is one sentence: *"We chose X over Y because Z; reverse if W."* T
 
 **Overruled pushback goes here too.** When you argued against something the user asked for and they reaffirmed it, record it as an attributed trade-off: *"The user chose X over Y despite Z; revisit if W."* Attribution is not blame — it's the information a future reader needs to know the choice was deliberate rather than an oversight. See the *Constructive dissent* section in `SKILL.md`.
 
+**So do overruled review findings.** When the build ⇄ review loop escalates and the user decides to ship as-is, the finding is marked `overruled` in the review ledger *and* lands here with the same shape. The ledger is the loop's working memory; this section is what someone reads six months later without knowing a loop ever ran.
+
 ### 8. Decision Records *(conditional)*
 
 Include when the plan produced ADRs. A short table is enough; the ADRs themselves hold the reasoning.
@@ -148,7 +163,7 @@ Include when the plan produced ADRs. A short table is enough; the ADRs themselve
 | [0008](../../docs/adr/0008-events-dispatched-post-commit.md) | Dispatch domain events after commit | Proposed | 3 |
 ```
 
-Linking each ADR to the phase that implements it is what lets `dev` mode know when to flip `Proposed → Accepted`.
+Linking each ADR to the phase that implements it is what lets `build` mode know when to flip `Proposed → Accepted`.
 
 When no decision in the plan cleared the significance gate, omit the section and say so in one line in *Risks & Trade-offs* — *"no architecturally significant decisions here, so no ADRs."* That sentence is real information about the size of the change; a manufactured ADR is not.
 
@@ -173,17 +188,18 @@ kind: plan
 title: JWT Authentication with Refresh Tokens
 slug: auth-jwt-refresh
 status: pending
-created_at: 2026-05-01T14:32:00Z
-updated_at: 2026-05-01T14:32:00Z
+created_at: 2026-08-09T14:32:00Z
+updated_at: 2026-08-09T14:32:00Z
 implemented_at: null
 canceled_at: null
-language: en
+language: en-US
 rigor: strict
 rigor_detected: strict
 derived_from: null
 adrs: [docs/adr/0004-jwt-over-server-sessions.md]
+reviews: []
 mode_history:
-  - { mode: plan, at: 2026-05-01T14:32:00Z }
+  - { mode: design, at: 2026-08-09T14:32:00Z }
 ---
 
 # JWT Authentication with Refresh Tokens
@@ -309,17 +325,18 @@ kind: plan
 title: Strangle the Old Pricing Service
 slug: pricing-strangler
 status: pending
-created_at: 2026-05-01T14:32:00Z
-updated_at: 2026-05-01T14:32:00Z
+created_at: 2026-08-09T14:32:00Z
+updated_at: 2026-08-09T14:32:00Z
 implemented_at: null
 canceled_at: null
-language: en
+language: en-US
 rigor: balanced
 rigor_detected: adaptive
-derived_from: staff-engineer-skill/research/2026-04-28-pricing-extraction-options.md
+derived_from: staff-engineer-skill/research/2026-07-28-pricing-extraction-options.md
 adrs: [docs/adr/0011-strangler-fig-for-pricing.md]
+reviews: []
 mode_history:
-  - { mode: plan, at: 2026-05-01T14:32:00Z }
+  - { mode: design, at: 2026-08-09T14:32:00Z }
 ---
 
 # Strangle the Old Pricing Service
