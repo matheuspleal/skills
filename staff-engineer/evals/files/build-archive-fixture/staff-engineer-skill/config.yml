@@ -1,0 +1,5 @@
+version: 1
+rigor: balanced
+language: pt-BR
+review:
+  auto: off

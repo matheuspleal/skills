@@ -3,19 +3,21 @@
   "evals": [
     {
       "id": 1,
-      "name": "pt-plan-domain-ddd",
-      "prompt": "/staff-engineer plan preciso modelar o domínio de um sistema de carrinho de compras com event sourcing, integrando com pagamentos via stripe e checagem de estoque em sistema legado",
-      "expected_output": "PT response. Plan mode. DDD/Architecture sections warranted. Plan file with full frontmatter under plans/. First-run gitignore prompt in PT. Significant decisions (event sourcing, Stripe, legacy ACL) produce ADRs in English.",
+      "name": "pt-design-domain-ddd",
+      "prompt": "/staff-engineer design preciso modelar o domínio de um sistema de carrinho de compras com event sourcing, integrando com pagamentos via stripe e checagem de estoque em sistema legado",
+      "expected_output": "PT response. Design mode. DDD/Architecture sections warranted. Plan file with full frontmatter under plans/. First-run setup prompt (config + gitignore) in PT. Significant decisions (event sourcing, Stripe, legacy ACL) produce ADRs in English.",
       "files": [],
       "assertions": [
         "Final response and plan body are written in Portuguese",
         "A plan file was created at staff-engineer-skill/plans/<YYYY-MM-DD>-<slug>.md",
-        "Plan frontmatter includes: kind: plan, title, slug, status: pending, created_at (ISO 8601 with time), updated_at, implemented_at: null, canceled_at: null, language: pt, rigor, rigor_detected, derived_from, adrs, mode_history with one plan entry",
+        "Plan frontmatter includes: kind: plan, title, slug, status: pending, created_at (ISO 8601 with a non-zero time component), updated_at, implemented_at: null, canceled_at: null, language: pt-BR, rigor, rigor_detected, derived_from, adrs, reviews, mode_history",
+        "The single mode_history entry uses the new mode name 'design', not 'plan'",
         "Plan body includes a Domain Model section with ubiquitous language and aggregate root + invariants",
         "Plan body includes Implementation Phases (numbered, each with goal/changes/tests/acceptance)",
         "Plan body includes Risks & Trade-offs section that names at least one explicit YAGNI/KISS/DRY tension",
         "Plan body includes References section citing Eric Evans and Vaughn Vernon",
-        "First-run gitignore prompt was asked in Portuguese (mentions 'staff-engineer-skill' and '.gitignore')",
+        "First-run setup was offered in Portuguese and covers both the config file and the .gitignore entries in a single prompt",
+        "The proposed .gitignore entries are the subfolders (plans/, research/, reviews/) rather than the whole staff-engineer-skill/ directory, so config.yml stays trackable",
         "Skill asked clarifying questions (>=3) before producing the plan",
         "At least one ADR was created under docs/adr/ for a significant decision (event sourcing, Stripe integration, or the legacy anti-corruption layer)",
         "ADR files are written in English even though the plan is in Portuguese",
@@ -24,19 +26,19 @@
     },
     {
       "id": 2,
-      "name": "en-plan-feature-flag",
-      "prompt": "/staff-engineer plan add a feature flag service for the checkout flow with percentage-based rollouts and per-user-id overrides",
-      "expected_output": "EN response. Plan mode. No DDD overkill. References Fowler/Beck/Martin.",
+      "name": "en-design-feature-flag",
+      "prompt": "/staff-engineer design add a feature flag service for the checkout flow with percentage-based rollouts and per-user-id overrides",
+      "expected_output": "EN response. Design mode. No DDD overkill. References Fowler/Beck/Martin.",
       "files": [],
       "assertions": [
         "Final response and plan body are written in English",
         "A plan file was created at staff-engineer-skill/plans/<YYYY-MM-DD>-<slug>.md",
-        "Plan frontmatter is complete (kind, title, slug, status: pending, created_at, updated_at, implemented_at: null, canceled_at: null, language: en, rigor, rigor_detected, derived_from, adrs, mode_history)",
+        "Plan frontmatter is complete (kind, title, slug, status: pending, created_at, updated_at, implemented_at: null, canceled_at: null, language: en-US, rigor, rigor_detected, derived_from, adrs, reviews, mode_history)",
         "Plan body includes Implementation Phases, Risks & Trade-offs, References",
         "Plan does NOT include a Domain Model section",
         "Risks & Trade-offs explicitly invokes YAGNI or KISS",
         "References cites at least one of: Fowler, Beck, Martin",
-        "First-run gitignore prompt was asked in English",
+        "First-run setup was offered in English",
         "Skill asked clarifying questions (>=3) before producing the plan"
       ]
     },
@@ -44,48 +46,59 @@
       "id": 3,
       "name": "pt-mode-missing",
       "prompt": "/staff-engineer preciso refatorar nosso PricingService legado de 4 mil linhas sem testes para algo testável",
-      "expected_output": "Asks mode-resolution question in PT, offering all three modes. Does not produce a plan, research, or code.",
+      "expected_output": "Asks the mode-resolution question in PT, offering all FOUR execution modes. Does not produce a plan, research, review, or code.",
       "files": [],
       "assertions": [
         "Final response is in Portuguese",
-        "Asks the mode-resolution question offering all three execution modes: research, plan, and dev",
+        "Asks the mode-resolution question offering all four execution modes: research, design, build, and review",
+        "Uses the new mode names (design, build) rather than the legacy ones (plan, dev)",
         "Does NOT create any plan file",
         "Does NOT create any research file",
+        "Does NOT create any review file",
         "Does NOT implement any code",
         "Does NOT proceed past the question"
       ]
     },
     {
       "id": 4,
-      "name": "pt-dev-existing-plan",
-      "prompt": "/staff-engineer dev",
-      "expected_output": "Picks the only pending plan, implements both phases via TDD with atomic commits in EN, marks plan implemented.",
-      "files": [],
+      "name": "pt-build-archives-plan-and-repairs-backlinks",
+      "prompt": "/staff-engineer build",
+      "expected_output": "One pending plan exists (slugify-utils, rigor balanced, review off via config), derived from a research file and carrying one Proposed ADR. Build must implement both phases, accept the ADR, mark the plan implemented, MOVE it to plans/implemented/, and rewrite every backlink that pointed at the old path (the research file's spawned_plans and the ADR's Plan: line).",
+      "files": [
+        "evals/files/build-archive-fixture/staff-engineer-skill/config.yml",
+        "evals/files/build-archive-fixture/staff-engineer-skill/plans/2026-08-01-slugify-utils.md",
+        "evals/files/build-archive-fixture/staff-engineer-skill/research/2026-07-30-slug-transliteration.md",
+        "evals/files/build-archive-fixture/docs/adr/0003-hand-rolled-slug-transliteration.md"
+      ],
       "assertions": [
-        "Final response is in Portuguese (matches plan language)",
+        "Final response is in Portuguese (config language is pt-BR)",
         "string_utils.py created with both slugify and truncate functions",
-        "test_string_utils.py created with cases from plan",
+        "A test file was created covering the cases listed in both phases",
         "All tests pass",
-        "Plan frontmatter status changed from pending to implemented",
-        "Plan frontmatter implemented_at is set to non-null ISO 8601 timestamp",
-        "Plan frontmatter updated_at was bumped",
-        "Plan mode_history has a dev entry appended",
+        "No new dependency was added — the plan and its ADR both rule that out",
+        "Plan frontmatter status changed from pending to implemented and implemented_at is a non-null ISO 8601 timestamp with a non-zero time component",
+        "Plan mode_history has a build entry appended, and the pre-existing design entry was left untouched",
         "Acceptance checkboxes in both phases are ticked",
-        "Git log has at least 4 commits (2 phases x impl+test)",
-        "Commits follow Conventional Commits and are in English",
-        "Implementation commits precede test commits in each pair"
+        "ADR 0003 Status changed from Proposed to Accepted, and no other line of the ADR body was modified",
+        "The plan file was MOVED to staff-engineer-skill/plans/implemented/2026-08-01-slugify-utils.md and no longer exists at the original path",
+        "The research file's spawned_plans entry was rewritten to point at the archived path under plans/implemented/",
+        "The ADR's Plan: line was rewritten to point at the archived path",
+        "The research file's prose was otherwise unchanged",
+        "Git log has at least 4 commits (2 phases x impl+test), Conventional Commits, in English",
+        "Implementation commits precede test commits in each pair",
+        "No review ledger was created, because config.review.auto is off"
       ]
     },
     {
       "id": 5,
-      "name": "en-plan-simple-yagni-no-adr",
-      "prompt": "/staff-engineer plan add a GET /health endpoint that returns 200 with JSON {status: 'ok', uptime_seconds, version}",
+      "name": "en-design-simple-yagni-no-adr",
+      "prompt": "/staff-engineer design add a GET /health endpoint that returns 200 with JSON {status: 'ok', uptime_seconds, version}",
       "expected_output": "Short plan (1-2 phases), no Domain Model, no Architecture Decisions, and crucially ZERO ADRs — nothing here clears the significance gate, and the skill says so explicitly instead of manufacturing one.",
       "files": [],
       "assertions": [
         "Final response and plan body are written in English",
         "A plan file was created at staff-engineer-skill/plans/<YYYY-MM-DD>-<slug>.md",
-        "Plan frontmatter is complete with language: en",
+        "Plan frontmatter is complete with language: en-US",
         "Plan body includes Implementation Phases, Risks & Trade-offs, References",
         "Plan does NOT include a Domain Model section",
         "Plan does NOT include an Architecture Decisions section",
@@ -99,9 +112,9 @@
     },
     {
       "id": 6,
-      "name": "pt-plan-adaptive-legacy",
-      "prompt": "/staff-engineer plan tenho um PricingService legado com ~4 mil linhas, sem nenhum teste, cheio de if aninhado e acesso direto ao banco no meio da regra. Preciso adicionar um novo tipo de desconto progressivo. Não posso reescrever o serviço agora, quero seguir o padrão que já existe no arquivo e entregar rápido.",
-      "expected_output": "PT response. Plan mode. Rigor auto-detected and asked with 3 options, adaptive suggested as '(detected)'. Plan recorded with rigor: adaptive. Lean plan. Risks & Trade-offs records the conscious decision to follow the legacy convention against the canon. An ADR is legitimate here — deliberately diverging from good practice clears the significance gate even under adaptive.",
+      "name": "pt-design-adaptive-legacy",
+      "prompt": "/staff-engineer design tenho um PricingService legado com ~4 mil linhas, sem nenhum teste, cheio de if aninhado e acesso direto ao banco no meio da regra. Preciso adicionar um novo tipo de desconto progressivo. Não posso reescrever o serviço agora, quero seguir o padrão que já existe no arquivo e entregar rápido.",
+      "expected_output": "PT response. Design mode. Rigor auto-detected and asked with 3 options, adaptive suggested as '(detected)'. Plan recorded with rigor: adaptive. Lean plan. Risks & Trade-offs records the conscious decision to follow the legacy convention against the canon. An ADR is legitimate here — deliberately diverging from good practice clears the significance gate even under adaptive.",
       "files": [],
       "assertions": [
         "Final response and plan body are written in Portuguese",
@@ -113,14 +126,16 @@
         "Plan body does NOT include an Architecture Decisions section",
         "Risks & Trade-offs explicitly names at least one place where following the existing legacy convention diverges from the canon and states it is a deliberate choice",
         "Plan does NOT mandate a full TDD rewrite of the legacy service",
+        "The plan does not impose SOLID refactoring, layering, or value objects on the legacy service — adaptive mirrors what exists",
+        "The adaptive floor is still respected: the plan does not propose leaving errors swallowed, secrets in code, or the existing suite red",
         "Adaptive rigor did not suppress ADR consideration — the skill either created an ADR recording the deliberate divergence, or explicitly reasoned about whether one was warranted"
       ]
     },
     {
       "id": 7,
-      "name": "en-plan-strict-backend-explicit",
-      "prompt": "/staff-engineer plan strict design a new backend bounded context for subscription billing: create subscription, change plan with proration, cancel at period end, emit a domain event consumers can react to. Node/TypeScript backend.",
-      "expected_output": "EN response. Plan mode. Explicit strict override acknowledged WITHOUT asking the rigor question. Reads backend-canon. Plan includes Domain Model + Architecture Decisions + Test Strategy by default. Grounds backend patterns in node-js-boilerplate. New bounded context clears the ADR gate.",
+      "name": "en-design-strict-backend-explicit",
+      "prompt": "/staff-engineer design strict design a new backend bounded context for subscription billing: create subscription, change plan with proration, cancel at period end, emit a domain event consumers can react to. Node/TypeScript backend.",
+      "expected_output": "EN response. Design mode. Explicit strict override acknowledged WITHOUT asking the rigor question. Reads backend-canon. Plan includes Domain Model + Architecture Decisions + Test Strategy by default. Grounds backend patterns in node-js-boilerplate. New bounded context clears the ADR gate.",
       "files": [],
       "assertions": [
         "Final response and plan body are written in English",
@@ -139,9 +154,9 @@
     },
     {
       "id": 8,
-      "name": "en-plan-asks-rigor-suggestion",
-      "prompt": "/staff-engineer plan add an audit log: every write to the orders table should append an immutable record (who, when, what changed). We have some unit tests on the service layer but no domain layer and the controllers are pretty thin and untested.",
-      "expected_output": "EN response. Plan mode. No rigor token, mixed project signals -> skill auto-detects, suggests balanced as detected, but still presents all three levels with rationale before committing rigor.",
+      "name": "en-design-asks-rigor-suggestion",
+      "prompt": "/staff-engineer design add an audit log: every write to the orders table should append an immutable record (who, when, what changed). We have some unit tests on the service layer but no domain layer and the controllers are pretty thin and untested.",
+      "expected_output": "EN response. Design mode. No rigor token, no config file, mixed project signals -> skill auto-detects, suggests balanced as detected, but still presents all three levels with rationale before committing rigor.",
       "files": [],
       "assertions": [
         "Final response and plan body are written in English",
@@ -155,24 +170,25 @@
     },
     {
       "id": 9,
-      "name": "pt-dev-respects-strict-rigor",
+      "name": "pt-build-legacy-alias-and-strict-rigor",
       "prompt": "/staff-engineer dev",
-      "expected_output": "A pending plan with rigor: strict already exists at the LEGACY root path staff-engineer-skill/2026-05-19-money-format.md (no plans/ subfolder). Dev mode must still find it via the compatibility branch, read rigor from frontmatter WITHOUT re-asking, implement both phases strictly via TDD, atomic commits impl-before-test in English, mark the plan implemented. Conversation in PT.",
+      "expected_output": "Uses the LEGACY alias 'dev', which must resolve to build mode. A pending plan with rigor: strict sits at the LEGACY root path staff-engineer-skill/2026-05-19-money-format.md (no plans/ subfolder) with a legacy 'language: pt' value and a legacy mode_history entry of mode: plan. Build must find it, read rigor without re-asking, implement both phases strictly via TDD, atomic commits impl-before-test in English, and mark the plan implemented. Conversation in PT.",
       "files": ["evals/files/strict-dev-fixture/staff-engineer-skill/2026-05-19-money-format.md"],
       "assertions": [
-        "Final response is in Portuguese (matches the plan language)",
+        "The legacy 'dev' alias was accepted and resolved to build mode without erroring",
+        "Final response is in Portuguese (the legacy 'language: pt' value was read as pt-BR without complaint)",
         "The plan at the legacy root path was found and selected (the compatibility branch works)",
-        "Skill did NOT ask the user to choose or confirm a rigor level in dev mode",
+        "Skill did NOT ask the user to choose or confirm a rigor level in build mode",
         "money.py created with format_brl handling positive and negative cents",
         "A test file was created with the cases from both phases",
         "A failing test existed before the implementation for at least one phase (visible in transcript or commit order)",
         "All tests pass at the end",
         "Plan frontmatter status changed from pending to implemented and implemented_at is a non-null ISO 8601 timestamp",
         "Plan frontmatter rigor remained strict (unchanged)",
-        "mode_history has a dev entry appended",
+        "mode_history has a build entry appended and the legacy 'plan' entry was NOT rewritten",
         "Acceptance checkboxes in both phases are ticked",
         "Git log has implementation commits preceding their paired test commits, Conventional Commits, in English",
-        "The plan file was NOT relocated into plans/ — dev mode edits in place, it does not migrate files"
+        "The plan file stayed at the legacy root path while pending — it was not migrated into plans/ mid-flight"
       ]
     },
     {
@@ -184,7 +200,7 @@
       "assertions": [
         "Final response and research body are written in Portuguese",
         "A research file was created at staff-engineer-skill/research/<YYYY-MM-DD>-<slug>.md",
-        "Research frontmatter includes kind: research, title, slug, status: complete, question, created_at (ISO 8601 with a non-zero time component), updated_at, language: pt, spawned_plans, superseded_by",
+        "Research frontmatter includes kind: research, title, slug, status: complete, question, created_at (ISO 8601 with a non-zero time component), updated_at, language: pt-BR, spawned_plans, superseded_by",
         "All eight sections are present: Question & Scope, Method & Sources, Findings, Options & Trade-offs, Recommendation, What Would Change This, Open Questions, References",
         "Findings are individually tagged as verified (with a source) or inferred/unverified, rather than presented as a list of untagged claims",
         "Options & Trade-offs compares at least two real candidates and includes a reversal or migration cost for each",
@@ -192,14 +208,14 @@
         "What Would Change This names at least two concrete, checkable signals that would invalidate the recommendation",
         "NO plan file was created",
         "NO implementation code was written",
-        "The skill offered to turn the research into a plan as a next step",
+        "The skill offered to turn the research into a plan as a next step, using the mode name 'design'",
         "The skill attempted to check the versions actually installed in the project (package.json / lockfile) or explicitly noted it could not"
       ]
     },
     {
       "id": 11,
-      "name": "pt-plan-pushback-microservices",
-      "prompt": "/staff-engineer plan somos 2 devs e vamos começar um MVP de marketplace do zero. Já decidi que vai ser microserviços desde o dia 1: um serviço pra usuários, um pra produtos, um pra pedidos, um pra pagamentos, cada um com seu banco, comunicando por eventos. Quero o plano de implementação disso.",
+      "name": "pt-design-pushback-microservices",
+      "prompt": "/staff-engineer design somos 2 devs e vamos começar um MVP de marketplace do zero. Já decidi que vai ser microserviços desde o dia 1: um serviço pra usuários, um pra produtos, um pra pedidos, um pra pagamentos, cada um com seu banco, comunicando por eventos. Quero o plano de implementação disso.",
       "expected_output": "PT response. The skill must push back ONCE, properly grounded (Fowler 'MonolithFirst' / 'Microservice Premium', team size vs operational cost), with a concrete cost, a concrete alternative (modular monolith with enforced boundaries and an extraction path), and a falsifier. It must NOT comply silently, and must NOT refuse or stonewall — it still moves toward delivering a usable plan and records the disagreement as an attributed trade-off.",
       "files": [],
       "assertions": [
@@ -217,8 +233,8 @@
     },
     {
       "id": 12,
-      "name": "en-plan-matches-existing-adr-format",
-      "prompt": "/staff-engineer plan we need to move order processing off synchronous HTTP onto a queue so the checkout request returns immediately. Node/TypeScript, and we already run Postgres.",
+      "name": "en-design-matches-existing-adr-format",
+      "prompt": "/staff-engineer design we need to move order processing off synchronous HTTP onto a queue so the checkout request returns immediately. Node/TypeScript, and we already run Postgres.",
       "expected_output": "The repo already has two Nygard-format ADRs (0001, 0002) in docs/adr. The skill must detect the directory, match the existing Nygard template rather than imposing MADR, and number the new ADR 0003.",
       "files": [
         "evals/files/existing-adrs/docs/adr/0001-use-nygard-adrs.md",
@@ -236,8 +252,8 @@
     },
     {
       "id": 13,
-      "name": "pt-plan-derives-from-research",
-      "prompt": "/staff-engineer plan quero implementar a fila de e-mails de onboarding que a gente pesquisou",
+      "name": "pt-design-derives-from-research",
+      "prompt": "/staff-engineer design quero implementar a fila de e-mails de onboarding que a gente pesquisou",
       "expected_output": "A completed research file already exists at staff-engineer-skill/research/2026-06-02-background-job-runner.md recommending pg-boss. The plan must find it, read it, set derived_from, NOT re-ask questions the research already settled (which runner, why not Redis), and carry the recommendation into the plan. The research file's spawned_plans must be updated too.",
       "files": ["evals/files/research-fixture/staff-engineer-skill/research/2026-06-02-background-job-runner.md"],
       "assertions": [
@@ -267,6 +283,106 @@
         "What Would Change This names the traffic level or access pattern at which a cache WOULD become the right call",
         "The skill did NOT simply pick a cache in order to be agreeable",
         "All eight research sections are present"
+      ]
+    },
+    {
+      "id": 15,
+      "name": "pt-config-overrides-detection-and-skips-question",
+      "prompt": "/staff-engineer design preciso adicionar suporte a nota de crédito no faturamento: quando uma fatura emitida é estornada parcialmente, gerar um documento de crédito ligado à fatura original",
+      "expected_output": "The project LOOKS strict (layered src/modules/billing with domain/application, value objects, a vitest suite, husky) but config.yml pins rigor: adaptive. The config must win, silently: no rigor question, and the plan is written at adaptive. This is the explicit escape hatch for 'I don't always want this to be strict'.",
+      "files": [
+        "evals/files/config-rigor-fixture/staff-engineer-skill/config.yml",
+        "evals/files/config-rigor-fixture/package.json",
+        "evals/files/config-rigor-fixture/src/modules/billing/domain/invoice.ts",
+        "evals/files/config-rigor-fixture/src/modules/billing/domain/value-objects/money.ts",
+        "evals/files/config-rigor-fixture/src/modules/billing/application/issue-invoice.ts",
+        "evals/files/config-rigor-fixture/test/invoice.spec.ts"
+      ],
+      "assertions": [
+        "Final response and plan body are written in Portuguese (config.language is pt-BR)",
+        "The skill did NOT ask the user to choose a rigor level — the config answered it",
+        "The skill stated in roughly one line which rigor level it is using and that it came from the config file",
+        "Plan frontmatter has rigor: adaptive",
+        "rigor_detected reflects what the project actually looks like (strict, or at minimum not adaptive) rather than being copied from the config value",
+        "The plan mirrors the project's existing layered conventions rather than imposing new ones or demanding a rewrite",
+        "The plan does NOT mandate full TDD or add DDD ceremony beyond what the codebase already does",
+        "No first-run setup prompt was shown, because a config file already exists",
+        "A plan file was created at staff-engineer-skill/plans/<YYYY-MM-DD>-<slug>.md"
+      ]
+    },
+    {
+      "id": 16,
+      "name": "en-review-standalone-balanced",
+      "prompt": "/staff-engineer review take a look at src/reports/order-report-controller.ts before I open the PR",
+      "expected_output": "Standalone review, no plan. Config pins balanced. The file has planted defects at two tiers: universal (no tenant filter on the query despite tenantId being available, string-interpolated SQL, a catch that swallows the error and returns a success-shaped payload with total 0) and balanced-only (discount/refund business rules living in the controller, money handled as raw numbers with a float multiplication). Balanced must raise both tiers, with the first tier as blockers. No code is written.",
+      "files": [
+        "evals/files/review-balanced-fixture/staff-engineer-skill/config.yml",
+        "evals/files/review-balanced-fixture/src/reports/order-report-controller.ts"
+      ],
+      "assertions": [
+        "Final response is in English",
+        "NO source file was modified — review judges, it does not write code",
+        "The review identifies that the query filters by orderId but not by the tenantId that is right there on the request (a silent cross-tenant leak)",
+        "The review identifies the string-interpolated SQL as an injection risk",
+        "The review identifies that the catch block swallows the error and returns a 200-shaped payload with total_cents: 0",
+        "Those three are rated blocker (or the review's highest severity), not minor or nit",
+        "The review identifies the discount/refund business rules living in the controller as a dependency-rule/layering problem, rated major",
+        "The review identifies money being handled as a raw number with a float multiplication (0.98) as primitive obsession or a rounding hazard",
+        "Every finding is anchored to a specific location in the file rather than stated in the abstract",
+        "Each finding names a concrete change, not just the problem",
+        "Severities used come only from the set blocker/major/minor/nit",
+        "The review states what it checked and found sound, not only what is wrong",
+        "The review states that it is applying the balanced level, and that the level came from the config file",
+        "It offered to persist the review as a ledger rather than writing one unprompted"
+      ]
+    },
+    {
+      "id": 17,
+      "name": "en-review-adaptive-ceiling",
+      "prompt": "/staff-engineer review take a look at src/reports/order-report-controller.ts before I open the PR",
+      "expected_output": "Identical file to eval 16, but config pins rigor: adaptive. The universal defects (tenant leak, SQL injection, swallowed error) must still be raised — they are correctness/security and the adaptive floor. The layering and primitive-obsession findings must NOT be raised at all, not even as nits. This is the discriminating test for 'adaptive actually buys silence'.",
+      "files": [
+        "evals/files/review-adaptive-fixture/staff-engineer-skill/config.yml",
+        "evals/files/review-adaptive-fixture/src/reports/order-report-controller.ts"
+      ],
+      "assertions": [
+        "Final response is in English",
+        "NO source file was modified",
+        "The review still raises the missing tenant filter (cross-tenant leak) as a blocker",
+        "The review still raises the string-interpolated SQL as a blocker",
+        "The review still raises the swallowed error returning a success-shaped payload",
+        "The review does NOT raise Clean Architecture or layering concerns about business rules living in the controller — not as major, not as minor, not as a nit, not as an aside",
+        "The review does NOT raise primitive obsession, value objects, or SOLID violations",
+        "The review does NOT recommend restructuring the file into layers or extracting a domain service",
+        "The review states that it is applying the adaptive level",
+        "Compared to the balanced run on the same file, this review is visibly narrower rather than the same list with softer wording"
+      ]
+    },
+    {
+      "id": 18,
+      "name": "en-build-review-loop-is-bounded",
+      "prompt": "/staff-engineer build",
+      "expected_output": "One pending plan (password-policy, balanced) with config review.auto: per_phase and max_rounds: 2. Build must run a review round per phase BEFORE committing that phase, write a ledger under reviews/, respect the round budget, and never commit past an open blocker. The loop must terminate — no phase may exceed 2 review rounds.",
+      "files": [
+        "evals/files/review-loop-fixture/staff-engineer-skill/config.yml",
+        "evals/files/review-loop-fixture/staff-engineer-skill/plans/2026-08-05-password-policy.md"
+      ],
+      "assertions": [
+        "password_policy.py created with violations, is_acceptable, and a Policy dataclass",
+        "A test file exists covering the cases listed in both phases, and all tests pass",
+        "A review ledger was created at staff-engineer-skill/reviews/<YYYY-MM-DD>-password-policy.md",
+        "The ledger frontmatter includes kind: review, plan (pointing at the plan file), rigor: balanced, rounds, and open_findings",
+        "The ledger records at least one review round per phase, each stamped with an ISO 8601 timestamp with a non-zero time component",
+        "No phase ran more than 2 review rounds — the configured budget was respected",
+        "Every finding uses a severity from the set blocker/major/minor/nit and has a status from open/fixed/deferred/overruled/invalid",
+        "Findings are anchored to specific locations in the code produced by that phase",
+        "The review round for a phase happened BEFORE that phase's commits, visible in the transcript or in the commit contents",
+        "No phase was committed while a blocker finding was still open",
+        "If any blocker or major remained unresolved after the budget, the skill stopped and asked the user instead of continuing (mark N/A if none remained)",
+        "Minor and nit findings were recorded as follow-ups rather than silently fixed",
+        "The plan's reviews frontmatter list references the ledger path",
+        "At completion the ledger status is closed and the plan was archived to staff-engineer-skill/plans/implemented/",
+        "The review never edited source files on its own — fixes appear as build's work"
       ]
     }
   ]

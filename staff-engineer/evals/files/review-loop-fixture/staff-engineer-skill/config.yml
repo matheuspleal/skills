@@ -1,0 +1,8 @@
+version: 1
+rigor: balanced
+language: en-US
+review:
+  auto: per_phase
+  max_rounds: 2
+  fix: [blocker, major]
+  defer: [minor, nit]
