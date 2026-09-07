@@ -41,7 +41,7 @@ Uninstall: `npx skills remove skills`
 
 ### 🧠 staff-engineer
 
-Senior/staff-engineer mode for non-trivial features, refactors, migrations, code review, and deep technical investigations. Two orthogonal axes: an **execution mode** — `research`, `design`, `build`, `review` — and a **rigor level** that controls how strictly the canon is applied.
+Senior/staff-engineer mode for non-trivial features, refactors, migrations, code review, and deep technical investigations. Three orthogonal axes: an **execution mode** — `research`, `design`, `build`, `review` — a **rigor level** controlling how strictly the canon is applied, and a **test profile** choosing which kinds of test the project maintains.
 
 It is deliberately **not agreeable**. The value of a staff engineer is in finding what's wrong with an approach while changing it is still cheap, so the skill argues — once, with citations, a concrete cost, a real alternative, and what would prove it wrong — then executes your call and records the disagreement.
 
@@ -61,7 +61,7 @@ Each step is optional — day to day it's `design` → `build`; a well-understoo
 
 - **`research`** — investigates a bounded question and writes `staff-engineer-skill/research/<date>-<slug>.md`. Every finding is tagged `[verified: <source>, accessed <date>]` or `[inferred: not verified]`, so a reader knows which claims to re-check. Always compares at least two real options with adoption / carrying / **reversal** cost, recommends one, and states what would make the recommendation wrong.
 - **`design`** — interviews you (5–7 focused questions), then writes `staff-engineer-skill/plans/<date>-<slug>.md` with a frontmatter status lifecycle (`pending` → `in_progress` → `implemented` / `canceled`). Reuses existing research instead of re-asking what it already settled.
-- **`build`** — picks a pending plan, implements phase-by-phase via red-green-refactor, closes each phase with a review round, hands off to `tdd-atomic-commits` for commits, flips the plan's ADRs to `Accepted` as phases land, then archives the finished plan into `plans/implemented/` and repairs every backlink pointing at it.
+- **`build`** — picks a pending plan, implements phase-by-phase via red-green-refactor, closes each phase with a review round, hands off the commits to the project's commit skill (`tdd-atomic-commits` by default), flips the plan's ADRs to `Accepted` as phases land, then archives the finished plan into `plans/implemented/` and repairs every backlink pointing at it.
 - **`review`** — judges code against the plan's acceptance criteria and its recorded rigor level. Produces findings, never code.
 
 **The build ⇄ review loop is bounded on purpose:**
@@ -76,12 +76,15 @@ Review runs *before* each phase commits, so fixes fold into the phase's own comm
 
 **Configuration:**
 
-Per-project defaults live in a **committed** `staff-engineer-skill/config.yml`, so the rigor question is answered once per project instead of once per session (plans, research, and reviews stay gitignored):
+Per-project defaults live in a **committed** `staff-engineer-skill/config.yml`, so the rigor and test-type questions are answered once per project instead of once per session (plans, research, and reviews stay gitignored):
 
 ```yaml
 version: 1
 rigor: balanced          # skips the rigor question entirely
 language: pt-BR          # pt-BR | en-US — artifact language
+tests:
+  backend:  { types: [unit, integration] }   # or a preset: minimal | standard | full
+  frontend: { types: standard, framework: next }
 review:
   auto: per_phase        # per_phase | end_of_plan | off
   max_rounds: 2
@@ -89,9 +92,14 @@ review:
   defer: [minor, nit]
 adr: { enabled: true, dir: docs/adr, template: auto }
 commits: { enabled: true }
+skills:
+  commits: tdd-atomic-commits    # swap it, or null to commit directly
+  extra: []                      # { name, when } — the moment that pulls a skill in
 ```
 
-Every key is optional, precedence is **explicit token → config → auto-detection → ask**, and a broken config degrades with a one-line note instead of halting. A plan's rigor is frozen in its frontmatter when it's written — changing the config later never reaches back into work already planned.
+Every key is optional, precedence is **explicit token → config → auto-detection → ask**, and a broken config degrades with a one-line note instead of halting. A plan's rigor and test profile are frozen in its frontmatter when it's written — changing the config later never reaches back into work already planned.
+
+**Complementary skills** are declared here rather than hard-coded, with two guards: a listed skill can be consulted, but it can't move the rigor contract, widen the test profile, or touch a review verdict. The config refuses prompt overrides for the same reason — a committed file that rewrites the skill's judgment would switch the reviewer off for a whole team, and "add this skill" would be that loophole with an extra step.
 
 **Architecture Decision Records:**
 
@@ -106,10 +114,27 @@ Plans record architecturally significant decisions as ADRs in `docs/adr/` ([Nyga
 
 - `adaptive` — mirror the project's existing conventions even when subpar, while holding a short **floor**: don't make it worse, no secrets or swallowed errors, the suite stays green and covered code stays covered, honest names, scope discipline. Review raises blockers and floor violations only — SOLID and Clean Architecture findings are **out of scope**, which is the point of the level.
 - `balanced` — Clean Architecture's dependency rule, SOLID as vocabulary, and Object Calisthenics' load-bearing rules (wrap primitives, first-class collections, Law of Demeter, Tell Don't Ask) as active smells. Tests where failure is **silent** — domain logic, security boundaries, contracts between layers — not for platform behavior, rendered appearance, or config shape; a structural constraint is lint, not a test. No mandatory TDD ordering, no DDD ceremony.
-- `strict` — full canon: TDD as the loop (red before green, every phase), DDD tactical patterns, four-layer Clean Architecture, `Either` over thrown control flow, domain events after persistence — with the [node-js-boilerplate](https://github.com/matheuspleal/node-js-boilerplate) as the backend source of truth (fetched on demand); community best practices for frontend.
+- `strict` — full canon: TDD as the loop (red before green, every phase), DDD tactical patterns, four-layer Clean Architecture, `Either` over thrown control flow, domain events after persistence — with the [node-js-boilerplate](https://github.com/matheuspleal/node-js-boilerplate) as the backend source of truth (fetched on demand).
 - Set `rigor:` in the config to stop being asked, or override per invocation: `/staff-engineer design strict <prompt>`
 
 Each level's reference file states not only what it requires but **what `review` may not raise under it** — a reviewer without a written ceiling is how a "less strict" mode quietly becomes strict again.
+
+**Test profile** (which *kinds* of test, as opposed to how hard — the two are independent, so `strict` with a unit-only profile is a coherent setting):
+
+- **Backend:** `unit`, `integration`, `e2e`, `contract`, `load`. **Frontend:** `unit`, `component`, `e2e`, `a11y`, `visual`.
+- Chosen as a preset — `minimal`, `standard`, `full` — or as an explicit list, per stack. Resolved from your prompt, then the config, then what the project already runs, then a question; recorded in the plan's frontmatter as an expanded list.
+- **A test type absent from the profile is out of scope for findings, at every severity.** That single rule is what the axis buys: a team that decided against keeping an e2e suite green never gets a review demanding one. What the profile *doesn't* do is excuse testing — a silent-failure surface with no test of any type still blocks under `balanced`.
+- The profile never invents infrastructure. A type with no harness in the repo becomes a phase that stands it up, with its cost visible, or a line saying nothing in this plan will use it — adding Playwright is a dependency commitment, not a side effect.
+
+**Frontend (React & Next.js):**
+
+Read at **every** rigor level, not only `strict` — rigor decides how hard the conventions bind, not whether the framework has any.
+
+- **Test through the accessibility tree.** Testing Library's query priority (role → label → text, `data-testid` last) isn't style: a role query only passes if the element is reachable the way a user reaches it, so every behavioral assertion carries a free accessibility assertion.
+- **Appearance is asserted by screenshot or not at all.** `className`, computed CSS, SVG coordinates and z-index break on every refactor and pass while the page renders unusably. That's what the `visual` type is for.
+- **The dependency rule, in a component tree.** A component is transport, like a controller; pricing rules and permissions belong in a module a test can call without rendering. The tell: when asserting a *rule* costs you four providers of test setup, the rule leaked into the view.
+- **Async Server Components can only be reached by `e2e`** — unsupported by Vitest, Jest and Cypress component testing, per Next.js's own testing guides. So an app that puts behavior inside them and a profile without `e2e` is a gap to settle at `design` time, usually by moving the logic out, which the dependency rule wanted anyway.
+- Its authority is community consensus plus the installed version's docs, not a pinned in-house repo — and it says so, so it isn't cited with the same confidence as the backend boilerplate.
 
 **Version-pinned documentation:**
 
@@ -127,8 +152,8 @@ Fowler (refactoring, evolutionary architecture), Evans & Vernon (DDD), Uncle Bob
 **Triggers:**
 
 - `/staff-engineer [research|design|build|review] [adaptive|balanced|strict] <prompt>`
-- "research the options" / "compare these approaches" / "which library should we use" / "let's plan this properly" / "think this through end-to-end" / "model the domain" / "design the architecture" / "split into phases" / "write an ADR" / "record this decision" / "review this diff against our standards" / "follow the legacy project's pattern" / "make this less strict" / "strict/rigorous TDD"
-- Portuguese: "pesquisar opções" / "investigar abordagens" / "comparar bibliotecas" / "planejar feature" / "modelar domínio" / "arquitetura limpa" / "pensar como staff" / "preciso de um plano" / "dividir em fases" / "registrar decisão arquitetural" / "revisar o código" / "revisar esse diff" / "seguir o padrão do projeto legado" / "deixar menos rigoroso" / "modo adaptive/balanced/strict"
+- "research the options" / "compare these approaches" / "which library should we use" / "let's plan this properly" / "think this through end-to-end" / "model the domain" / "design the architecture" / "split into phases" / "write an ADR" / "record this decision" / "review this diff against our standards" / "follow the legacy project's pattern" / "make this less strict" / "strict/rigorous TDD" / "which tests should this have" / "no e2e" / "unit tests only"
+- Portuguese: "pesquisar opções" / "investigar abordagens" / "comparar bibliotecas" / "planejar feature" / "modelar domínio" / "arquitetura limpa" / "pensar como staff" / "preciso de um plano" / "dividir em fases" / "registrar decisão arquitetural" / "revisar o código" / "revisar esse diff" / "seguir o padrão do projeto legado" / "deixar menos rigoroso" / "modo adaptive/balanced/strict" / "quais testes escrever" / "sem e2e" / "definir os tipos de teste"
 
 Prefer this skill over ad-hoc planning or ad-hoc research whenever the change is non-trivial — touches multiple modules, has architectural implications, introduces a new bounded context, or warrants phased rollout.
 
