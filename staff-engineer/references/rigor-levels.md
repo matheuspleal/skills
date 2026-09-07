@@ -229,6 +229,8 @@ The rule, not the folder structure: **source dependencies point inward, toward p
 - **If the project has no layers at all**, the rule degrades to its useful minimum:
   business rules do not live in controllers, route handlers, React components, or
   serverless entry points. Extract the rule; leave the wiring where the framework wants it.
+  `frontend-canon.md` works this out for a component tree, including the tell: when
+  asserting a *rule* costs you four providers of test setup, the rule leaked into the view.
 - Ports are defined by the side that *needs* them (the domain), implemented by the side
   that *has* the technology (infrastructure). A repository interface next to its Prisma
   implementation is an interface pointing the wrong way.
@@ -331,8 +333,10 @@ user to weigh, not a `blocker` (see [The test profile](#the-test-profile)).
 
 Full canon, with a concrete reference implementation instead of a book quote. For
 **backend**, `matheuspleal/node-js-boilerplate` is the source of truth — read
-`backend-canon.md` for when to fetch it and what to pull. For **frontend**, there is no
-reference repo yet, so it's current community practice, stated explicitly as such.
+`backend-canon.md` for when to fetch it and what to pull. For **frontend**, read
+`frontend-canon.md`; there is no reference repo, so its authority is community consensus
+plus the installed version's docs, and it says so. Don't cite the two with equal
+confidence — one is checkable against code, the other against judgment.
 
 What `strict` adds on top of everything in `balanced`:
 

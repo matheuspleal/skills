@@ -78,15 +78,13 @@ pass against the repo.
 
 ---
 
-## Frontend (`strict`, no reference project)
+## Frontend
 
-There is no reference repo for frontend yet. In `strict`, apply current
-community/industry best practices and say so explicitly in the plan:
-component-driven structure with clear separation of view / state / data-access;
-typed APIs and typed component contracts; colocated tests (Testing Library +
-the project's runner) covering behavior, not implementation; accessibility as a
-default, not a phase; data fetching/caching via an established library rather
-than hand-rolled effects; state kept as local as the use case allows. Note in
-*Risks & Trade-offs* that frontend rigor rests on community consensus, not a
-pinned in-house source of truth, so conventions are open to the user's
-direction.
+Not here — see `frontend-canon.md`, which covers React and Next.js at every
+rigor level rather than only under `strict`.
+
+The distinction between the two files is worth keeping in mind when you cite
+either one: this file's authority is a repo you can read, so a claim about
+backend convention is checkable. `frontend-canon.md` rests on community
+consensus plus the installed version's own docs, which is weaker evidence and
+is labeled as such there. Don't present the two with equal confidence.

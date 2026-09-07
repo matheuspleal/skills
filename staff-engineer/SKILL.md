@@ -43,7 +43,7 @@ Rigor and the profile are both resolved once, when a plan is created, and **reco
 
 ## Reference material — read what's relevant before you act
 
-Ten reference files ship with this skill. Load them when the situation calls for it; do not load them all upfront.
+Eleven reference files ship with this skill. Load them when the situation calls for it; do not load them all upfront.
 
 - `references/rigor-levels.md` — the contract for each rigor level: what it requires, what it forbids, and what `review` may raise under it, plus the test-profile vocabulary and presets the levels compose with. Read the resolved level's section and the test-profile section before writing a plan, implementing a phase, or judging a diff.
 - `references/config.md` — `staff-engineer-skill/config.yml`: schema, precedence, first-run setup, and how it degrades when broken. Read at the start of any invocation where a config file exists or should be offered.
@@ -54,7 +54,8 @@ Ten reference files ship with this skill. Load them when the situation calls for
 - `references/adr.md` — ADR format, numbering, the significance gate, the supersession protocol, directory detection, commit conventions. Read when a plan is about to record decisions, or when a `build` phase changes one.
 - `references/build-workflow.md` — red-green-refactor, where the review round fits, integration with `tdd-atomic-commits`, phase handoff, ADR acceptance. Read at the start of `build` mode.
 - `references/live-docs.md` — reading installed versions before looking anything up, the Context7 MCP flow, source hierarchy, citation format. Read before recommending or writing code against a third-party API you haven't verified this session.
-- `references/backend-canon.md` — how `strict` uses the `node-js-boilerplate` as the backend source of truth: when to WebFetch it, what to extract, the network-failure fallback, and the frontend baseline. Read only when resolved rigor is `strict`.
+- `references/backend-canon.md` — how `strict` uses the `node-js-boilerplate` as the backend source of truth: when to WebFetch it, what to extract, and the network-failure fallback. Read only when resolved rigor is `strict` and the work is backend.
+- `references/frontend-canon.md` — React and Next.js: detection, testing through the accessibility tree, the dependency rule in a component tree, why async Server Components can only be reached by `e2e`, and what `review` may raise per level. Read whenever the work touches frontend, at **any** rigor level.
 
 ## Invocation, mode, and language resolution
 
