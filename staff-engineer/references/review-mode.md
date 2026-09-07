@@ -41,7 +41,7 @@ Severity decides what happens next, so it can't be a mood. Each level has an anc
 
 | Severity | Anchor | Effect (default config) |
 |---|---|---|
-| `blocker` | The phase's acceptance criteria are not actually met; a correctness bug; a security hole; data loss; a broken contract; the suite is red; a test the rigor contract requires is missing entirely | `build` fixes before commit |
+| `blocker` | The phase's acceptance criteria are not actually met; a correctness bug; a security hole; data loss; a broken contract; the suite is red; a surface the rigor contract requires tested has no test of **any type in the plan's profile** | `build` fixes before commit |
 | `major` | A violation of the **recorded rigor contract** for this plan, or a design flaw that will be expensive to reverse once it ships | `build` fixes before commit |
 | `minor` | A real improvement that is cheap to defer: naming, local duplication, a missing edge case, a smell the level treats as advisory | Recorded as a follow-up, not fixed in-loop |
 | `nit` | Taste. Formatting, ordering, phrasing | One line, no action, never blocks |
@@ -61,7 +61,7 @@ point at the specific line of the rigor contract a finding violates, it isn't a 
 
 ## The validity gate
 
-Before a finding goes in the ledger, all four must hold. A finding that fails any of
+Before a finding goes in the ledger, all five must hold. A finding that fails any of
 them is a follow-up note, or nothing.
 
 1. **Anchored.** It points at a `file:line` the phase actually changed — or at something
@@ -71,15 +71,26 @@ them is a follow-up note, or nothing.
    rigor contract, correctness / security / data integrity, or an explicit trade-off in
    the plan that the code contradicts. "Best practice" unattached to any of those four is
    not grounding.
-3. **Actionable.** It names the change, not just the problem. "This is coupled" is a
+3. **In the profile.** If the finding is about a missing test, the type it asks for is in
+   the plan's `tests` profile. A missing e2e in a `[unit, integration]` project is not a
+   finding at any severity — the user declined that type, and asking anyway overrides
+   their decision by volume.
+4. **Actionable.** It names the change, not just the problem. "This is coupled" is a
    complaint; "inject `Clock` at the constructor so the expiry test doesn't sleep" is a
    finding.
-4. **Proportional.** Severity per the rubric above, not per how much it bothers you.
+5. **Proportional.** Severity per the rubric above, not per how much it bothers you.
 
 The gate exists because of a specific, predictable failure: an untethered reviewer
 produces a wishlist, `build` implements the wishlist, and the phase quietly triples in
 size with none of it in the plan. The user asked for a healthy loop — this is the part
 that makes it one.
+
+**Gate 3 has one honest escape valve, and it is not a finding.** When a surface the rigor
+contract requires tested can only be covered well by a type the profile excludes, say so
+in one line in the *Clean* section: what the surface is, what would cover it, and that the
+profile rules it out. That hands the user a decision about their profile instead of
+handing `build` work it was told not to do. It is the only place a review is allowed to
+speak about a type outside the profile, and it never carries a severity.
 
 ---
 
@@ -206,6 +217,9 @@ slug: <plan-slug>
 status: open              # open | closed
 plan: staff-engineer-skill/plans/2026-08-09-checkout-queue.md
 rigor: balanced           # copied from the plan; the standard this review applied
+tests:                    # copied from the plan; the types this review was allowed to ask for
+  backend: [unit, integration]
+  frontend: null
 created_at: 2026-08-09T11:04:17Z
 updated_at: 2026-08-09T13:22:41Z
 language: pt-BR           # pt-BR | en-US — language of the prose
@@ -293,6 +307,13 @@ the working tree, someone else's commit.
 stop to ask: state the level you're applying in one line and proceed. A standalone review
 writes no code, so being wrong about the level costs one re-run, and a question here buys
 less than it costs.
+
+**Profile resolution** follows the same path: `config.tests` → the plan's `tests` → what
+the project actually runs. Detection is the common case here, and it should be
+*descriptive*: if the repo has no e2e harness, the profile has no `e2e`, so gate 3 rules
+out "add an end-to-end test" before it can be written. A standalone review is exactly
+where an unbounded reviewer does the most damage — nobody agreed to a scope, so the only
+brake is what the project visibly already does.
 
 **Output** goes inline in the conversation: the same severity rubric, the same validity
 gate, grouped by severity with the `Clean` line. Then offer to persist it as a ledger

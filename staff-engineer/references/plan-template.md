@@ -19,6 +19,9 @@ canceled_at: null     # set ISO timestamp when status -> canceled
 language: pt-BR       # pt-BR | en-US — language of the prose
 rigor: balanced           # adaptive | balanced | strict — the contract build and review obey
 rigor_detected: balanced  # what auto-detection suggested, kept for traceability
+tests:                    # the resolved test profile — expanded lists, never preset names
+  backend: [unit, integration]
+  frontend: null          # null = this plan doesn't touch that stack
 derived_from: null        # path to the research file this plan came from, when there is one
 adrs: []                  # ADR paths this plan produced, e.g. [docs/adr/0007-....md]
 reviews: []               # review ledger paths, e.g. [staff-engineer-skill/reviews/2026-08-09-....md]
@@ -35,6 +38,7 @@ Rules:
 - **`status` only moves forward**: `pending → in_progress → implemented` or `pending → canceled` / `in_progress → canceled`. Once `implemented` or `canceled`, the plan is terminal.
 - **Slug ASCII-only**. No spaces, no accented characters. Keep it short — 2–5 words max. The plan's review ledger reuses this slug.
 - **`derived_from` is bidirectional.** When a plan comes from a research file, set it here *and* append this plan's path to that file's `spawned_plans`. Half a link is worse than none — the reader who follows it from the other side hits a dead end.
+- **`tests` holds expanded lists, never preset names.** `standard` is a shorthand whose meaning could shift with a later version of this skill; the plan is a contract and has to mean the same thing in six months. A stack the plan doesn't touch is `null` — an empty list would read as "this stack deliberately has no tests", which is a different claim. Plans written before this key existed simply lack it; treat that as "the profile was never recorded" and fall back to the level's default preset, saying so once.
 - **`adrs` lists every ADR the plan produced**, including ones the user rejected. An empty list is a legitimate and common outcome; see `adr.md` for the significance gate.
 - **`language` accepts the legacy bare values** `pt` and `en` from files written by earlier versions. Read them as `pt-BR` / `en-US`; don't rewrite them.
 
@@ -128,12 +132,27 @@ Include when touching production data, public contracts, or anything that warran
 
 ### 6. Test Strategy *(conditional)*
 
-Include when the testing approach is non-obvious. Skip when standard unit + a few integration tests is enough.
+Include when the testing approach is non-obvious. Skip when the profile plus the level's default doctrine already answers it.
 
-- **Pyramid balance** — how many unit, integration, end-to-end. Why.
+The profile in the frontmatter says which *kinds* of test exist. This section says how they're used **on this plan**:
+
+- **Type per phase** — for each phase, which of the profile's types apply and why. This is what `build` reads instead of guessing at implementation time, and what makes "the phase has no integration test" checkable rather than arguable.
 - **Outside-in vs. inside-out** — which school is driving design here. Why.
 - **Characterization tests** — if we're around legacy code, which behaviors do we lock in first?
 - **Test doubles** — what gets mocked, what stays real. Justify.
+- **Gaps the profile creates** — a surface the chosen types can't cover well, named here rather than discovered in review. If a type in the profile has no harness yet, this is where the phase that builds it appears, or where you say plainly that nothing in this plan will use it.
+
+A per-phase mapping is a table when there are more than three phases:
+
+```markdown
+| Phase | Types | Note |
+|---|---|---|
+| 1 | unit | Pure discount rules; no I/O to reach. |
+| 2 | unit, integration | The repository is the seam; real Postgres via testcontainers. |
+| 3 | integration | HTTP boundary. No e2e — not in this project's profile. |
+```
+
+That last cell is the load-bearing one. Writing down *why* a type is absent turns a future review finding into a settled decision.
 
 ### 7. Risks & Trade-offs
 
@@ -195,6 +214,9 @@ canceled_at: null
 language: en-US
 rigor: strict
 rigor_detected: strict
+tests:
+  backend: [unit, integration, e2e]
+  frontend: null
 derived_from: null
 adrs: [docs/adr/0004-jwt-over-server-sessions.md]
 reviews: []
@@ -332,6 +354,9 @@ canceled_at: null
 language: en-US
 rigor: balanced
 rigor_detected: adaptive
+tests:
+  backend: [unit, integration]
+  frontend: null
 derived_from: staff-engineer-skill/research/2026-07-28-pricing-extraction-options.md
 adrs: [docs/adr/0011-strangler-fig-for-pricing.md]
 reviews: []
@@ -357,9 +382,14 @@ Characterization tests first (Feathers, Ch. 13). For each discount rule we
 plan to extract, we capture current behavior — bugs included — before
 touching anything. Behavioral changes go through review separately.
 
-Pyramid: characterization tests at the integration level (real
-`PricingService` against a fixture catalog), unit tests for the new rule
-classes. No mocks of `PricingService` itself; that defeats the purpose.
+Profile is `[unit, integration]`. Phase 1 is integration only — the
+characterization suite runs the real `PricingService` against a fixture
+catalog. Phase 2 adds unit tests for the extracted rule classes and keeps
+the integration suite green unchanged. No mocks of `PricingService` itself;
+that defeats the purpose.
+
+There is no e2e here and that's deliberate: this project has no browser or
+HTTP suite, and standing one up is not what a strangler run is for.
 
 ## Phase 1 — Characterize current behavior for `PercentageDiscount`
 

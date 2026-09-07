@@ -46,13 +46,21 @@ This step is more important than it looks:
 
 ### Choosing the test type
 
-The plan's *Test Strategy* section (if present) tells you the balance. When it's absent:
+This is not an open choice. The plan's `tests` frontmatter lists the types available on this project, and the *Test Strategy* section (when present) maps them to phases. Read both before writing the test; pick from the profile.
 
-- **Unit test** — a small piece of logic, no I/O, no collaborators that need real wiring. Fast, isolated.
-- **Integration test** — when the unit under test is the seam between two real things (a use case + a real DB adapter, a controller + a real route). Slower, more realistic.
+Within the profile, the usual fit:
+
+- **Unit** — a small piece of logic, no I/O, no collaborators that need real wiring. Fast, isolated.
+- **Integration** — when the unit under test is the seam between two real things (a use case + a real DB adapter, a controller + a real route). Slower, more realistic.
+- **Component** *(frontend)* — a component driven the way a user drives it. See `frontend-canon.md`.
 - **End-to-end** — only for the spine of the user-visible flow. Expensive; one well-placed E2E is worth ten brittle ones.
+- **Contract**, **a11y**, **visual**, **load** — see the vocabulary in `rigor-levels.md`.
 
 If you find yourself wanting a fourth mock to make a unit test work, that's a signal: this might be an integration test in disguise, or the design needs better boundaries.
+
+**When the right test isn't in the profile**, don't quietly write it anyway and don't quietly skip the coverage. The profile is a recorded decision, so contradicting it is a plan/reality divergence: say what the phase needs, what the profile allows, and let the user widen the profile or accept the gap. Writing an e2e test into a project that declined e2e leaves behind a test with no harness, no CI job, and no owner — which is how a suite starts rotting.
+
+**A type in the profile with no harness in the repo** is the mirror case. The plan should already own it (see the *Test Strategy* template). If it doesn't, stop before scaffolding — adding Playwright or testcontainers is a dependency commitment, often an ADR, and never a side effect of a phase that was about something else.
 
 ## Step 3 — Green
 

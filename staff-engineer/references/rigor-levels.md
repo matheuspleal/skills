@@ -9,11 +9,18 @@ this file exists as a contract rather than as three adjectives. A reviewer witho
 written standard raises whatever it happens to notice, and a loop built on that is a
 taste generator.
 
-Read the section for the resolved level. Reading all three wastes context.
+The contract has a second half. Rigor says *how hard* you test; the **test profile** says
+*which kinds* of test the project maintains. Both are resolved at `design` time, both are
+written into the plan's frontmatter, and both bind `build` and `review`. See
+[The test profile](#the-test-profile).
+
+Read the section for the resolved level, plus the test-profile section. Reading all three
+levels wastes context.
 
 ## Table of contents
 
 - [How rigor gets resolved](#how-rigor-gets-resolved)
+- [The test profile](#the-test-profile)
 - [`adaptive` — mirror the project, hold a floor](#adaptive--mirror-the-project-hold-a-floor)
 - [`balanced` — Clean Architecture + SOLID + Object Calisthenics](#balanced--clean-architecture--solid--object-calisthenics)
 - [`strict` — the boilerplate is the standard](#strict--the-boilerplate-is-the-standard)
@@ -39,6 +46,110 @@ normalized away.
 `build` and `review` read `rigor` from the plan and do not re-ask. The decision was made
 at design time; re-litigating it mid-implementation would mean the plan is not the
 contract, and everything downstream depends on it being one.
+
+---
+
+## The test profile
+
+Rigor alone can't answer "should this phase have an end-to-end test?" — that depends on
+whether the project maintains end-to-end tests at all, which is a standing decision about
+the suite, not a judgment about this change. Teams differ on it for good reasons: an e2e
+suite nobody keeps green is worse than none, and a contract test is only worth writing
+when there's a second service on the other end.
+
+So the profile is a separate axis: **rigor decides how hard, the profile decides which
+kinds.** They compose. `strict` with a `[unit]` profile is a real configuration — TDD on
+every phase, all of it at the unit level — and so is `adaptive` with `[unit, e2e]`, which
+is what a legacy codebase with a smoke suite and no unit tests actually looks like.
+
+### The vocabulary
+
+A closed set, so a config value can be checked and a review finding can be ruled out of
+scope by name.
+
+**Backend**
+
+| Type | What it covers |
+|---|---|
+| `unit` | Logic in isolation. No I/O, no real collaborators. |
+| `integration` | One seam against one real dependency — a repository against a real DB, an adapter against a real broker. |
+| `e2e` | The application through its own public entry point (HTTP, GraphQL, CLI) with real dependencies behind it. |
+| `contract` | The agreement with another service, verified from both sides (Pact and kin). Only meaningful when a second service exists. |
+| `load` | Throughput and latency under a stated load. Only meaningful against a stated target. |
+
+**Frontend**
+
+| Type | What it covers |
+|---|---|
+| `unit` | Pure logic — formatters, reducers, custom hooks, derived state. |
+| `component` | A component through its rendered output, driven the way a user drives it (Testing Library). |
+| `e2e` | A real browser through a real flow (Playwright, Cypress). |
+| `a11y` | Automated accessibility assertions (axe and kin) over rendered output. |
+| `visual` | Screenshot comparison. **This is the assertion for appearance** — CSS, class names, spacing, SVG coordinates are never asserted as strings. |
+
+### Presets
+
+The profile is normally chosen as a preset and expanded to a list. Presets exist so the
+question has three answers instead of asking someone to compose a list from a table.
+
+| Preset | Backend | Frontend |
+|---|---|---|
+| `minimal` | `unit` | `unit` |
+| `standard` | `unit`, `integration` | `unit`, `component` |
+| `full` | `unit`, `integration`, `e2e`, `contract` | `unit`, `component`, `e2e`, `a11y` |
+
+Rigor supplies the default preset when nothing else does: `adaptive` → `minimal`,
+`balanced` → `standard`, `strict` → `full`. That mapping is a starting point for the
+question, not a rule — a user who picks `strict` and `minimal` has said something
+coherent, and the skill records it rather than arguing.
+
+Any explicit list overrides the preset. `[unit, integration, visual]` is valid; a type
+outside the vocabulary is not — fall back to the preset for that stack and say which value
+you rejected, in one line.
+
+### Resolution
+
+Precedence, highest first, resolved at `design` time alongside rigor:
+
+1. **What the user says in the prompt** — "sem e2e", "quero contract tests com o serviço
+   de pagamentos".
+2. **`tests:` in `config.yml`** — see `config.md`. When set, the question is not asked.
+3. **What the project already runs.** Detect it: test scripts in `package.json`, a
+   `playwright.config.*` or `cypress.config.*`, `*.e2e.*` / `*.spec.*` naming, a
+   testcontainers or docker-compose test service, an axe or Pact dependency. Detection
+   produces a *suggestion*, exactly as it does for rigor.
+4. **Ask**, offering the three presets with the detected one labeled.
+
+The resolved value is written to the plan's frontmatter as an **expanded list**, never as
+a preset name. A preset is a shorthand whose meaning could shift with a later version of
+this skill; the plan is a contract and has to mean the same thing in six months.
+
+### The profile never invents infrastructure
+
+A type in the profile that the project has no runner for does not mean "silently scaffold
+Playwright in phase 2". It means the plan owns that gap explicitly: either a phase that
+stands the harness up, with its cost visible, or a note in *Risks & Trade-offs* that the
+type is aspirational and nothing in this plan will use it. Adding a test framework is a
+dependency commitment and often an ADR — it is not a side effect of a checkbox.
+
+### What the profile does to `review`
+
+**A test type absent from the profile is out of scope for findings — at every severity.**
+Not a `blocker`, not a `nit`, not a footnote. The user declined that type; a reviewer that
+asks for it anyway has overridden the decision by volume, which is the same failure the
+`adaptive` scope rules exist to prevent.
+
+What the profile does **not** do is excuse testing altogether. The level's own doctrine
+still decides *whether* a surface needs a test; the profile only decides which kind is
+available to cover it. Under `balanced`, a silent-failure surface shipped with no test of
+any type in the profile is still a `blocker`.
+
+Those two rules collide in exactly one place, and it is worth handling honestly: a surface
+whose only sensible coverage is a type the profile excludes — cross-tenant isolation that
+really needs an integration test in a `[unit]` project. That is not a finding. It is
+evidence the profile is wrong for this work. Name it in one line in the review's *Clean*
+section and let the user decide whether to widen the profile. Reviewing against a standard
+the user explicitly declined is how a loop stops being trustworthy.
 
 ---
 
@@ -72,7 +183,9 @@ codebase, no matter how old:
 **Testing.** Only where the project already tests, or where a test is genuinely cheap and
 pins something risky you're about to change. Feathers' characterization test is the
 adaptive-correct move before touching untested high-risk behavior — that's not a rigor
-upgrade, it's the cheapest way to not break production.
+upgrade, it's the cheapest way to not break production. Which *kinds* of test are on the
+table is the plan's test profile, and at this level the profile is usually just a
+description of what the project already runs.
 
 **Architecture.** Don't impose DDD, don't impose layering, don't introduce value objects
 into a codebase that passes primitives everywhere. One `Money` type in a system of
@@ -88,10 +201,10 @@ into a codebase that passes primitives everywhere. One `Money` type in a system 
 ### What `review` may **not** raise under `adaptive`
 
 SOLID violations, Clean Architecture layering, Object Calisthenics smells, missing tests
-in a project that doesn't test, or "this would be better as a value object." Not as a
-`nit`, not as a footnote — **out of scope entirely**. The user chose this level precisely
-to buy silence on those, and a reviewer that smuggles them back in as advice has
-overridden the user's decision by volume.
+in a project that doesn't test, a test of a type the plan's profile excludes, or "this
+would be better as a value object." Not as a `nit`, not as a footnote — **out of scope
+entirely**. The user chose this level precisely to buy silence on those, and a reviewer
+that smuggles them back in as advice has overridden the user's decision by volume.
 
 The place where the divergence gets recorded is the plan's *Risks & Trade-offs* section,
 once, deliberately — and an ADR when the divergence is structural. That's the difference
@@ -185,6 +298,10 @@ loop when the design is unclear; test-after is honest when the shape was obvious
 matters is that the test exists where the doctrine above says it should, and that it
 pins behavior through a public interface rather than mirroring internals.
 
+The doctrine above decides **whether** a surface gets a test. The plan's test profile
+decides **which kind** is available to cover it — and it is the profile, not this
+doctrine, that answers "does this project do e2e?"
+
 ### What `review` may raise under `balanced`
 
 - `blocker` — acceptance criteria unmet; correctness; security; broken contract; suite
@@ -202,6 +319,11 @@ pins behavior through a public interface rather than mirroring internals.
 Missing aggregates, missing `Either`-style error returns, missing domain events, missing
 four-layer folder structure, or "this doesn't match the boilerplate." Those belong to
 `strict`. Raising them here is scope the user explicitly did not buy.
+
+Nor a test of a type the plan's profile excludes — a missing e2e in a
+`[unit, integration]` project is not a finding at any severity. If the surface genuinely
+can't be covered by anything in the profile, that's a note in the *Clean* section for the
+user to weigh, not a `blocker` (see [The test profile](#the-test-profile)).
 
 ---
 
@@ -226,8 +348,10 @@ What `strict` adds on top of everything in `balanced`:
   `presentation/` — plus explicit wiring in factories rather than a DI container.
 - **Explicit error handling** — `Either<Error, Result>` over thrown control flow, so the
   failure path is in the type and the caller can't forget it.
-- **Test layout** — fast isolated unit specs, plus e2e against a real dependency for the
-  seams that matter.
+- **Test layout** — fast isolated unit specs, plus, for the seams that matter, whichever
+  higher-level types the plan's profile carries. `full` is the default profile here, but a
+  `strict` plan with a narrower profile is coherent and binding: TDD applies to every type
+  in the profile and demands nothing outside it.
 
 The one honest exception: **don't manufacture a domain that isn't there.** Genuine CRUD
 and thin glue have no invariants to protect, and wrapping them in an aggregate produces
@@ -290,8 +414,10 @@ say so in the review rather than forcing it.
 
 ## Auto-detection heuristics
 
-Used only to form a *suggestion* when neither a token nor a config value is present. Keep
-it cheap — a few reads, not a full audit.
+Used only to form a *suggestion* **for rigor**, when neither a token nor a config value is
+present. The test profile has its own detection list in
+[The test profile](#the-test-profile); the two run off mostly the same reads, so do them
+together. Keep it cheap — a few reads, not a full audit.
 
 | Signal | Where to look |
 |---|---|

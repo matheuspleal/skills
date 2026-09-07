@@ -56,6 +56,23 @@ rigor: null
 # conversation. pt-BR | en-US
 language: null
 
+# Which kinds of test this project maintains, per stack. Rigor decides how hard you test;
+# this decides which kinds exist. See the test-profile section in rigor-levels.md for the
+# vocabulary and what it does to review.
+tests:
+  backend:
+    # A preset — minimal | standard | full — or an explicit list, e.g.
+    # [unit, integration, contract]. null = detect, then ask.
+    types: null
+    # Test runner. null = detect from the project.
+    runner: null
+  frontend:
+    types: null
+    runner: null
+    # UI framework, when detection is ambiguous or the repo holds more than one app.
+    # null = detect. react | next
+    framework: null
+
 review:
   # When build calls review automatically.
   #   per_phase   — after each phase's refactor, before its commit (default)
@@ -94,6 +111,7 @@ paths:
 | Setting | Order, highest first |
 |---|---|
 | `rigor` | explicit token on the invocation → `config.rigor` → auto-detect, then ask |
+| `tests.*` | what the user says in this session ("sem e2e") → `config.tests` → detect what the project runs → ask, offering presets |
 | `language` (artifacts) | `config.language` → detected from the conversation |
 | `language` (your replies) | always the conversation's language — config never overrides this |
 | `review.*` | what the user says in this session ("skip the review here") → config → default |
@@ -109,18 +127,20 @@ team-facing — unless the repo's existing ADRs are in another language. See `ad
 
 ## Config changes don't reach back
 
-A plan's `rigor` is written into its frontmatter when the plan is created, and that value
-is the contract `build` and `review` obey. Changing `config.rigor` later does **not**
-change plans already on disk.
+A plan's `rigor` and its resolved `tests` profile are written into its frontmatter when
+the plan is created, and those values are the contract `build` and `review` obey. Changing
+`config.rigor` or `config.tests` later does **not** change plans already on disk.
 
 This matters more than it looks. A plan written and argued at `balanced` has phases,
 tests, and trade-offs sized for `balanced`; re-reading it at `strict` six weeks later
 would make `review` raise findings against a standard the plan was never written to meet,
-and the loop would escalate on decisions nobody actually revisited. The frontmatter is
-the contract precisely so that it can't drift underneath the work.
+and the loop would escalate on decisions nobody actually revisited. The same holds for the
+profile: adding `e2e` to the config after a plan's phases were written would make `review`
+demand tests the phases never budgeted for. The frontmatter is the contract precisely so
+that it can't drift underneath the work.
 
-To change a live plan's rigor, say so explicitly — then it's a deliberate edit to the
-plan, with the reason recorded, not a side effect of a config commit.
+To change a live plan's rigor or profile, say so explicitly — then it's a deliberate edit
+to the plan, with the reason recorded, not a side effect of a config commit.
 
 ## When the config is broken
 
@@ -128,8 +148,10 @@ A config file that halts the skill is worse than no config file. Degrade, don't 
 
 - **Unknown key** → ignore it, mention it once in your first reply, keep going. A typo
   shouldn't cost the session.
-- **Invalid value** (`rigor: rigorous`, `max_rounds: "two"`) → fall back to the default for
-  that key, say which key and which default in one line, keep going.
+- **Invalid value** (`rigor: rigorous`, `max_rounds: "two"`, `types: [unit, smoke]`) → fall
+  back to the default for that key, say which key and which default in one line, keep
+  going. For an unknown test type, keep the valid ones and name the one you dropped —
+  silently discarding the whole list would be a bigger surprise than the typo.
 - **Unparseable YAML** → say so, proceed as if there were no config, and offer to fix the
   file. Don't guess at the author's intent by pattern-matching a broken document.
 - **`version` higher than you know** → read the keys you recognize, ignore the rest, note
@@ -144,17 +166,23 @@ backwards.
 The first time this skill runs in a project (no `config.yml`, working directory not
 ignored), fold setup into **one** question rather than three across three sessions.
 
-Detect rigor first (see `rigor-levels.md`), then ask, in the user's language, roughly:
+Detect rigor and the test profile first (see `rigor-levels.md` — the two run off mostly
+the same reads), then ask, in the user's language, roughly:
 
 > This looks like the first time you're using the Staff Engineer skill here. I'd suggest
 > writing `staff-engineer-skill/config.yml` with `rigor: balanced` (detected: mixed test
-> coverage, no layering) and adding `plans/`, `research/`, and `reviews/` to `.gitignore`
-> — the config stays committed so the whole team inherits the same standard. Sound good,
-> or would you rather set the rigor level per plan?
+> coverage, no layering) and `tests.backend: [unit, integration]` (detected: Vitest, no
+> e2e harness), and adding `plans/`, `research/`, and `reviews/` to `.gitignore` — the
+> config stays committed so the whole team inherits the same standard. Sound good, or
+> would you rather decide per plan?
 
-On acceptance: write the config with the detected rigor plus the defaults you're not
-changing left out, and append the three `.gitignore` entries. Don't commit either —
-offer, and let the user decide when.
+On acceptance: write the config with the detected rigor and profile plus the defaults
+you're not changing left out, and append the three `.gitignore` entries. Don't commit
+either — offer, and let the user decide when.
+
+Keep it one question. The detected values go in the prompt as claims the user can correct
+in their reply ("balanced sim, mas sem integration") — that's cheaper for them than a
+second round trip, and it's why detection runs before the question rather than after it.
 
 On decline: write nothing. Ask the rigor question per plan as usual, and don't re-offer
 the config in later sessions — declining once is an answer.
@@ -164,8 +192,9 @@ offer the three lines and nothing else.
 
 ## What doesn't belong in config
 
-- **Anything a specific plan owns.** The plan's rigor, its phases, its ADR list. Config
-  sets defaults for *new* work; the plan is the contract for *its* work.
+- **Anything a specific plan owns.** The plan's rigor, its resolved test profile, its
+  phases, its ADR list. Config sets defaults for *new* work; the plan is the contract for
+  *its* work.
 - **Credentials, tokens, or environment values.** This file is committed. Nothing that
   can't be read by everyone with repo access goes in it.
 - **Prompt overrides or behavioral instructions.** A config that can rewrite the skill's
@@ -181,13 +210,18 @@ offer the three lines and nothing else.
 version: 1
 rigor: adaptive
 language: pt-BR
+tests:
+  backend:
+    types: [unit]
 review:
   auto: end_of_plan
   max_rounds: 1
 ```
 
 One review at the end, one round, `adaptive` standards — review raises blockers and floor
-violations only, which in a legacy codebase is exactly the set worth interrupting for.
+violations only, which in a legacy codebase is exactly the set worth interrupting for. The
+profile says the truth about the suite: unit tests exist, nothing else does, and `review`
+will not ask for an integration test the team has no harness for.
 
 **Product team, the daily driver.**
 
@@ -195,12 +229,35 @@ violations only, which in a legacy codebase is exactly the set worth interruptin
 version: 1
 rigor: balanced
 language: pt-BR
+tests:
+  backend:
+    types: standard
+  frontend:
+    types: standard
 adr:
   dir: docs/adr
 ```
 
 Everything else default: review per phase, two rounds, blockers and majors fixed in-loop,
-minors deferred.
+minors deferred. `standard` expands to `[unit, integration]` on the backend and
+`[unit, component]` on the frontend — no e2e, which is the honest setting for a team that
+hasn't committed to keeping a browser suite green.
+
+**Full-stack app that does keep a browser suite green.**
+
+```yaml
+version: 1
+rigor: balanced
+language: pt-BR
+tests:
+  frontend:
+    types: [unit, component, e2e, a11y]
+    framework: next
+```
+
+The backend key is omitted, so backend work falls back to detection and the question. The
+frontend list is spelled out rather than using `full` because the team wants `a11y` on
+every plan — the kind of standing commitment a config file exists to hold.
 
 **Strict backend, no auto-commits (the team reviews the tree before it lands).**
 
@@ -208,6 +265,10 @@ minors deferred.
 version: 1
 rigor: strict
 language: en-US
+tests:
+  backend:
+    types: full
+    runner: vitest
 review:
   max_rounds: 3
 commits:
