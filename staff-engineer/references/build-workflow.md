@@ -119,9 +119,9 @@ Read `review-mode.md` for the rubric and the ledger format. What matters here, i
 
 Why before the commit: the alternative produces a history where every phase is trailed by cleanup commits, and `tdd-atomic-commits` can no longer tell the implementation story. Fixes belong inside the phase's own commits.
 
-## Step 6 — Commit (hand off to `tdd-atomic-commits`)
+## Step 6 — Commit (hand off to the commit skill)
 
-Each phase typically yields one or more impl/test commit pairs. Hand off to the `tdd-atomic-commits` skill for the actual commit work — its rules govern:
+Each phase typically yields one or more impl/test commit pairs. Hand off to the skill named in `config.skills.commits` — `tdd-atomic-commits` unless the project set something else, and `null` means commit directly with no handoff. Whichever skill owns the step, its rules govern:
 
 - Implementation commit first, test commit second (every commit independently runnable).
 - Conventional Commits subjects: `feat(scope): …`, `fix(scope): …`, `refactor(scope): …`, then `test(scope): …`.

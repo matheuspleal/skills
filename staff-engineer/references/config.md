@@ -101,6 +101,17 @@ commits:
   # false = build implements but leaves the working tree for you to commit.
   enabled: true
 
+# Other skills this project wants consulted. See the complementary-skills section in
+# SKILL.md for the two guards on what they may and may not change.
+skills:
+  # The skill `build` hands the commit step to. null = commit directly, no handoff.
+  commits: tdd-atomic-commits
+  # Extra skills, each with the situation that should pull it in. `when` describes a
+  # moment in the work, not a topic — "topic" matches everything and so triggers always.
+  extra: []
+  #  - name: design-system-audit
+  #    when: a phase adds or changes a shared UI component
+
 paths:
   # Rename the working directory if `staff-engineer-skill` collides with something.
   root: staff-engineer-skill
@@ -118,6 +129,7 @@ paths:
 | `adr.enabled` | per-plan opt-out in conversation → config → default |
 | `adr.dir` | `config.adr.dir` → directory detection → `docs/adr/` |
 | `commits.enabled` | what the user says in this session → config → default |
+| `skills.*` | what the user says in this session → config → the `tdd-atomic-commits` default for `commits`, empty for `extra` |
 
 **Language deserves its split.** Artifacts are shared and outlive the conversation, so
 their language should be stable no matter who ran the skill — that's the config's call.
@@ -184,6 +196,13 @@ Keep it one question. The detected values go in the prompt as claims the user ca
 in their reply ("balanced sim, mas sem integration") — that's cheaper for them than a
 second round trip, and it's why detection runs before the question rather than after it.
 
+**Complementary skills go in the same sentence, or nowhere.** If one or two of the
+available skills obviously fit this repo, name them here as part of the offer — *"e
+`tdd-atomic-commits` para os commits, já que ele está instalado"*. At most two, and only
+when the fit is obvious. A setup prompt that turns into a menu of skills stops being a
+question and becomes something the user dismisses, and dismissing it costs them the whole
+config file, not just the skills line.
+
 On decline: write nothing. Ask the rigor question per plan as usual, and don't re-offer
 the config in later sessions — declining once is an answer.
 
@@ -201,6 +220,12 @@ offer the three lines and nothing else.
   judgment ("always agree", "skip pushback") turns a shared file into a way to disable a
   reviewer for the whole team. Standards belong in `rigor`; opinions belong in the
   conversation.
+
+  `skills` sits right at the edge of that line, which is why it carries two guards
+  (SKILL.md, *Complementary skills*): a listed skill can be consulted, but it cannot move
+  the rigor contract, widen the test profile, or touch a review verdict. Without those,
+  "add this skill" would be the loophole that "add this instruction" was closed to
+  prevent.
 
 ## Worked examples
 

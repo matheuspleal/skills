@@ -25,6 +25,7 @@ tests:                    # the resolved test profile — expanded lists, never 
 derived_from: null        # path to the research file this plan came from, when there is one
 adrs: []                  # ADR paths this plan produced, e.g. [docs/adr/0007-....md]
 reviews: []               # review ledger paths, e.g. [staff-engineer-skill/reviews/2026-08-09-....md]
+skills: []                # complementary skills that actually ran, e.g. [tdd-atomic-commits]
 mode_history:
   - { mode: design, at: 2026-08-09T14:32:00Z }
   # append { mode: build, at: ... } when build mode picks the plan up
@@ -40,6 +41,7 @@ Rules:
 - **`derived_from` is bidirectional.** When a plan comes from a research file, set it here *and* append this plan's path to that file's `spawned_plans`. Half a link is worse than none — the reader who follows it from the other side hits a dead end.
 - **`tests` holds expanded lists, never preset names.** `standard` is a shorthand whose meaning could shift with a later version of this skill; the plan is a contract and has to mean the same thing in six months. A stack the plan doesn't touch is `null` — an empty list would read as "this stack deliberately has no tests", which is a different claim. Plans written before this key existed simply lack it; treat that as "the profile was never recorded" and fall back to the level's default preset, saying so once.
 - **`adrs` lists every ADR the plan produced**, including ones the user rejected. An empty list is a legitimate and common outcome; see `adr.md` for the significance gate.
+- **`skills` records what actually ran**, not what was available. `config.skills` is the project's roster; this is the team sheet. The distinction matters when someone reads the plan back and wonders why a phase looks the way it does.
 - **`language` accepts the legacy bare values** `pt` and `en` from files written by earlier versions. Read them as `pt-BR` / `en-US`; don't rewrite them.
 
 ## Where plans live

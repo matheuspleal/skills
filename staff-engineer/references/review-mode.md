@@ -332,8 +332,12 @@ being built.
 - **ADRs.** Review may raise "this decision cleared the significance gate and has no ADR"
   as a finding — `major` when the decision is structural, `minor` otherwise. It never
   flips an ADR's status; `Proposed → Accepted` belongs to `build`, when the phase lands.
-- **Commits.** Fixes fold into the phase's commits via `tdd-atomic-commits`. If
-  `config.commits.enabled` is false, the loop still runs; only the commit step is skipped.
+- **Commits.** Fixes fold into the phase's commits via the skill in `config.skills.commits`
+  (default `tdd-atomic-commits`). If `config.commits.enabled` is false, the loop still
+  runs; only the commit step is skipped.
+- **Complementary skills.** They can be consulted during `build`, but they never touch a
+  verdict here: another skill's opinion is not a finding, and it cannot close one. See
+  *Complementary skills* in `SKILL.md`.
 - **`config.review.auto: end_of_plan`.** One review over the plan's whole contribution
   after the last phase, same rubric and budget. Cheaper in interruptions, and structural
   findings arrive when they're expensive — that trade is the user's to make in config.

@@ -126,9 +126,23 @@ Do **not** synthesize the value from the `currentDate` context. That context has
 
 The first time this skill runs in a project — no `config.yml`, working directory not ignored — fold setup into **one** question instead of three spread across three sessions. Verify the cwd is a git repo first (`git rev-parse --is-inside-work-tree`); if it isn't, skip this entirely.
 
-Detect rigor, then offer both things together: write `config.yml` with the detected rigor, and add `plans/`, `research/`, and `reviews/` to `.gitignore` while leaving `config.yml` tracked. `references/config.md` holds the exact wording, the decline path, and the narrower prompt for when a config exists but the gitignore entries don't.
+Detect rigor and the test profile, then offer everything together: write `config.yml` with what you detected, and add `plans/`, `research/`, and `reviews/` to `.gitignore` while leaving `config.yml` tracked. If one or two available skills obviously fit the repo, name them in the same sentence — at most two. `references/config.md` holds the exact wording, the decline path, and the narrower prompt for when a config exists but the gitignore entries don't.
 
 Never commit either file on your own. Offer; the user decides when.
+
+## Complementary skills
+
+Other skills in the user's setup can own steps this one shouldn't reinvent. `config.skills` declares them, so a project can swap a collaborator instead of inheriting whichever one this skill happened to name — `commits` defaults to `tdd-atomic-commits` and is a default, not a hard dependency.
+
+- **Delegate at the step the other skill owns, and only there.** A skill listed in config is not a skill to consult every phase. `skills.extra` entries carry a `when` describing a *moment* in the work; if it fires on every phase, the `when` was written as a topic and is worth narrowing.
+- **The rigor contract is not delegable.** A complementary skill cannot raise or lower the plan's rigor, widen its test profile, or add scope to a phase. When its advice conflicts with the contract, the contract wins and you say so in one line rather than quietly following the more recent instruction.
+- **The review verdict is not delegable.** `review` owns severity and the finding list. Another skill's opinion is not a finding, and it cannot close one.
+- **Record what you actually used** in the plan's `skills` frontmatter — same traceability as `adrs`. What's in config is what's available; what's in the plan is what ran.
+- **A skill named in config that isn't installed** is a one-line note, not a stop. Configs outlive setups.
+
+The two guards are the point of the mechanism, not caveats on it. `references/config.md` refuses prompt overrides in the config file precisely because a committed file that can rewrite this skill's judgment becomes a way to switch the reviewer off for a whole team. "Add this skill" would be that same loophole with an extra step, so the guards close it in the same place.
+
+**Suggesting them.** On first run, if the available skills include one or two that obviously fit this repo, name them in the setup offer (see *First-run setup*) — nothing more. Proposing a list every session is how a helpful default becomes noise the user learns to skip past, and skipping past the setup prompt is the thing that costs them the config file entirely.
 
 ## Constructive dissent — argue, don't agree
 
@@ -258,12 +272,13 @@ tests:
 derived_from: <path to the research file this plan came from, or null>
 adrs: []
 reviews: []
+skills: []
 mode_history:
   - { mode: design, at: <same format, same command> }
 ---
 ```
 
-`rigor` and `tests` are the contract `build` and `review` obey. `rigor_detected` is traceability — when it differs from `rigor`, the user deliberately steered away from what the project looked like, which is signal worth preserving. Write `tests` as expanded lists, never preset names: a preset is shorthand whose meaning could shift in a later version of this skill, and a contract has to mean the same thing in six months. `adrs` is filled by Step 3b; `reviews` by the first review round.
+`rigor` and `tests` are the contract `build` and `review` obey. `rigor_detected` is traceability — when it differs from `rigor`, the user deliberately steered away from what the project looked like, which is signal worth preserving. Write `tests` as expanded lists, never preset names: a preset is shorthand whose meaning could shift in a later version of this skill, and a contract has to mean the same thing in six months. `adrs` is filled by Step 3b; `reviews` by the first review round; `skills` by `build`, as complementary skills actually run — config says what's available, the plan says what was used.
 
 Body sections in the order above (conditional ones inserted where they fit the narrative — typically *Domain Model* and *Architecture Decisions* before *Implementation Phases*, *Migration / Rollout Plan* after). Prose in the artifact language; code and identifiers in English. Each phase reads like a self-contained mini-spec another engineer could pick up.
 
@@ -342,7 +357,7 @@ read phase → red → green → refactor → review → fix → commit → mark
 3. **Green.** The smallest change that passes — or, absent a test, that satisfies the acceptance criteria. Resist over-engineering; that's what *Risks & Trade-offs* was about.
 4. **Refactor.** On a green bar: naming, duplication that hurts, missed abstractions. Re-run tests. In `adaptive`, keep refactors inside the phase's footprint.
 5. **Review.** Unless `config.review.auto` is `off` or `end_of_plan`, run a `review` round over the phase's diff before committing. See *The build ⇄ review loop* below.
-6. **Commit.** Hand off to `tdd-atomic-commits`: implementation commit first, then the test commit, both Conventional Commits, **messages in English** regardless of conversation language. Skip when `config.commits.enabled` is false.
+6. **Commit.** Hand off to the skill in `config.skills.commits` (default `tdd-atomic-commits`; `null` means commit directly): implementation commit first, then the test commit, both Conventional Commits, **messages in English** regardless of conversation language. Skip when `config.commits.enabled` is false.
 7. **Mark the phase done.** Tick acceptance criteria in the plan body, add the inline marker, bump `updated_at`. Do not rewrite the plan.
 8. **Accept the phase's ADRs.** If the *Decision Records* table maps an ADR to this phase, the decision is now real in code: change its `Status` from `Proposed` to `Accepted` — **that line only** — update `docs/adr/README.md` if it exists, and commit as `docs(adr): accept ADR-NNNN <short decision>`. An ADR left at `Proposed` forever turns `docs/adr/` into a record of intentions instead of a record of the system.
 
